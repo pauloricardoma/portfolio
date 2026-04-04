@@ -82,9 +82,9 @@ export default function ProjectsSection({
       );
 
       gsap.fromTo(".projects-canvas",
-        { autoAlpha: 0, scale: 0.95 },
+        { autoAlpha: 0 },
         {
-          autoAlpha: 1, scale: 1, duration: 0.8, ease: "power2.out",
+          autoAlpha: 1, duration: 0.8, ease: "power2.out",
           scrollTrigger: {
             trigger: ".projects-canvas",
             start: "top 85%",
