@@ -47,31 +47,6 @@ const DEFAULT_PRIMARY = {
   dark: "#4A7FD4",
 };
 
-/**
- * getInitialTheme — Retorna o tema inicial.
- *
- * PERFORMANCE (CLS fix):
- * No SSR (typeof window === "undefined"), retornamos "dark" como padrão.
- * No client, lemos localStorage e prefers-color-scheme.
- *
- * Se o tema do client for diferente do SSR, o primeiro render do client
- * vai usar o tema do SSR (dark), e o useEffect aplica o correto logo depois.
- * Isso evita hydration mismatch (React exige que SSR e primeira render batam).
- */
-function getInitialTheme(): ThemeMode {
-  if (typeof window === "undefined") return "dark";
-
-  const stored = localStorage.getItem("theme") as ThemeMode | null;
-  if (stored === "light" || stored === "dark") return stored;
-
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  return prefersDark ? "dark" : "light";
-}
-
-function getInitialPrimaryColor(): string {
-  if (typeof window === "undefined") return DEFAULT_PRIMARY.dark;
-  return localStorage.getItem("primaryColor") || "";
-}
 
 /**
  * buildPrimaryColors — Gera todas as variantes de primary a partir de UMA cor base.
@@ -95,8 +70,34 @@ function buildPrimaryColors(color: string, surfaceColor: string): IPrimaryColors
 }
 
 export function AppThemeProvider({ children }: { children: ReactNode }) {
-  const [themeMode, setThemeMode] = useState<ThemeMode>(getInitialTheme);
-  const [primaryColor, setPrimaryColorState] = useState<string>(getInitialPrimaryColor);
+  /**
+   * Inicializamos com os mesmos valores que o servidor usa ("dark" e ""),
+   * pra que o primeiro render do client seja IDÊNTICO ao HTML do SSR.
+   * Isso evita hydration mismatch — React exige paridade server/client.
+   *
+   * O useEffect abaixo roda SÓ no client, DEPOIS da hydration,
+   * e aí sim aplica o tema real do localStorage/prefers-color-scheme.
+   */
+  const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
+  const [primaryColor, setPrimaryColorState] = useState<string>("");
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("theme") as ThemeMode | null;
+    if (stored === "light" || stored === "dark") {
+      setThemeMode(stored);
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setThemeMode(prefersDark ? "dark" : "light");
+    }
+
+    const storedColor = localStorage.getItem("primaryColor");
+    if (storedColor) {
+      setPrimaryColorState(storedColor);
+    }
+
+    setHydrated(true);
+  }, []);
 
   const toggleTheme = useCallback(() => {
     setThemeMode((prev) => (prev === "light" ? "dark" : "light"));
@@ -107,14 +108,14 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("theme", themeMode);
-  }, [themeMode]);
+    if (hydrated) localStorage.setItem("theme", themeMode);
+  }, [themeMode, hydrated]);
 
   useEffect(() => {
-    if (primaryColor) {
+    if (hydrated && primaryColor) {
       localStorage.setItem("primaryColor", primaryColor);
     }
-  }, [primaryColor]);
+  }, [primaryColor, hydrated]);
 
   /**
    * useMemo — Reconstrói o tema só quando themeMode ou primaryColor mudam.
