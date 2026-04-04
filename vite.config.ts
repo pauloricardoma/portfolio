@@ -14,6 +14,6 @@ export default defineConfig({
      * mas o pacote exporta o "default" de forma que o `styled.p` fica undefined.
      * Ao colocar no noExternal, o Vite faz o bundle corretamente.
      */
-    noExternal: ["styled-components"],
+    noExternal: ["styled-components", "gsap"],
   },
 });
