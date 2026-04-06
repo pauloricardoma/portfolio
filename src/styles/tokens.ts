@@ -1,14 +1,3 @@
-/**
- * tokens.ts — Design tokens (valores constantes do design system).
- *
- * Tokens são os "átomos" do design — valores que NÃO mudam entre temas.
- * Cores mudam (light vs dark), mas spacing, font sizes e breakpoints não.
- *
- * Usamos uma base grid de 4px (padrão da indústria):
- * - xs=4, sm=8, md=16, lg=24... cada step é múltiplo de 4
- * - Isso garante alinhamento visual consistente em toda a UI
- */
-
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -19,15 +8,6 @@ export const spacing = {
   xxxl: 64,
 } as const;
 
-/**
- * Escala tipográfica — cada tamanho tem um propósito:
- * - xs/sm: labels, captions, texto auxiliar
- * - md: corpo de texto padrão (16px é o tamanho base da web)
- * - lg/xl: subtítulos
- * - xxl: títulos de seção
- * - display: títulos grandes
- * - hero: texto do Hero, máximo impacto visual
- */
 export const fontSize = {
   xs: 12,
   sm: 14,
@@ -46,12 +26,6 @@ export const fontWeight = {
   bold: 700,
 } as const;
 
-/**
- * Line-height — espaçamento entre linhas:
- * - tight (1.2): títulos grandes, onde queremos linhas mais juntas
- * - normal (1.5): corpo de texto, melhor legibilidade
- * - relaxed (1.75): texto com bastante respiro
- */
 export const lineHeight = {
   tight: 1.2,
   normal: 1.5,

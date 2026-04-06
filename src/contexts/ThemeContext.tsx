@@ -1,21 +1,3 @@
-/**
- * ThemeContext.tsx — Gerenciamento de tema (light/dark) + cor primary dinâmica.
- *
- * CONCEITO: Tema dinâmico em runtime
- *
- * O styled-components ThemeProvider recebe um OBJETO de tema.
- * Quando esse objeto muda, TODOS os styled-components re-renderizam
- * com as novas cores automaticamente — sem precisar de CSS variables.
- *
- * Aqui, quando o usuário escolhe uma nova cor primary no color picker:
- * 1. Salvamos a cor no state (primaryColor)
- * 2. Recalculamos TODAS as variantes da primary (hover, pressed, container, etc.)
- *    usando a função buildPrimaryColors()
- * 3. Mesclamos no tema base (light ou dark) via spread operator
- * 4. O ThemeProvider recebe o tema atualizado → tudo re-renderiza
- *
- * useMemo() garante que o tema só é recalculado quando themeMode ou primaryColor mudam.
- */
 import {
   createContext,
   useCallback,
@@ -41,23 +23,11 @@ interface ThemeContextData {
 
 const ThemeContext = createContext<ThemeContextData>({} as ThemeContextData);
 
-/** Cores primary padrão de cada tema */
 const DEFAULT_PRIMARY = {
   light: "#0F2B5B",
   dark: "#4A7FD4",
 };
 
-
-/**
- * buildPrimaryColors — Gera todas as variantes de primary a partir de UMA cor base.
- *
- * Usa color-mix() do CSS pra criar hover, pressed, outline e container.
- * A cor "onPrimary" (texto sobre primary) é sempre branca — funciona
- * bem com a maioria das cores escuras/médias que o usuário vai escolher.
- *
- * Se quiser ser mais preciso, pode calcular a luminância da cor
- * e usar branco ou preto baseado no contraste (acessibilidade WCAG).
- */
 function buildPrimaryColors(color: string, surfaceColor: string): IPrimaryColors {
   return {
     primary: color,
@@ -70,14 +40,6 @@ function buildPrimaryColors(color: string, surfaceColor: string): IPrimaryColors
 }
 
 export function AppThemeProvider({ children }: { children: ReactNode }) {
-  /**
-   * Inicializamos com os mesmos valores que o servidor usa ("dark" e ""),
-   * pra que o primeiro render do client seja IDÊNTICO ao HTML do SSR.
-   * Isso evita hydration mismatch — React exige paridade server/client.
-   *
-   * O useEffect abaixo roda SÓ no client, DEPOIS da hydration,
-   * e aí sim aplica o tema real do localStorage/prefers-color-scheme.
-   */
   const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
   const [primaryColor, setPrimaryColorState] = useState<string>("");
   const [hydrated, setHydrated] = useState(false);
@@ -117,15 +79,6 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [primaryColor, hydrated]);
 
-  /**
-   * useMemo — Reconstrói o tema só quando themeMode ou primaryColor mudam.
-   *
-   * Sem useMemo, criaria um objeto novo a cada render,
-   * causando re-render desnecessário de TODOS os styled-components.
-   *
-   * Se o usuário escolheu uma cor custom, sobrescrevemos as cores primary.
-   * Caso contrário, usa o tema padrão (light.ts ou dark.ts).
-   */
   const theme: ITheme = useMemo(() => {
     const baseTheme = themeMode === "light" ? light : dark;
 

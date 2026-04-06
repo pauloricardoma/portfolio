@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { spacing, borderRadius, breakpoints } from "~/styles/tokens";
+import { spacing, borderRadius } from "~/styles/tokens";
 
 /**
  * ContactWrapper — CLS fix: filhos animados com gsap.from({ opacity: 0 })

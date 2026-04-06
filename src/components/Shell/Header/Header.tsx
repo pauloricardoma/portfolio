@@ -1,22 +1,3 @@
-/**
- * Header.tsx — Navegação fixa com glassmorphism.
- *
- * CONCEITOS:
- *
- * 1. SCROLL DETECTION:
- *    Usamos useEffect + window scroll listener pra detectar
- *    quando o usuário passou do Hero (100vh). Só então o header aparece.
- *    Isso evita o header cobrindo o Hero (que é fullscreen).
- *
- * 2. SMOOTH SCROLL via anchor links:
- *    Os links apontam pra "#hero", "#projects", etc.
- *    O scroll-behavior: smooth no CSS + scrollIntoView() fazem
- *    a página deslizar suavemente até a seção.
- *
- * 3. useAppTheme():
- *    Hook que criamos no ThemeContext — retorna themeMode e toggleTheme.
- *    O botão de tema alterna entre sol e lua.
- */
 import { useState, useEffect, useCallback } from "react";
 import Container from "~/components/UI/Container/Container";
 import ColorPicker from "~/components/UI/ColorPicker/ColorPicker";
@@ -46,11 +27,6 @@ export default function Header() {
   const [isVisible, setIsVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  /**
-   * Scroll listener: mostra o header só depois de scrollar
-   * 50% da viewport (metade do Hero).
-   * Cleanup: remove o listener quando o componente desmonta.
-   */
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -79,7 +55,7 @@ export default function Header() {
         <Container>
           <HeaderInner>
             <Logo href="#hero" onClick={(e) => { e.preventDefault(); scrollTo("#hero"); }}>
-              PR
+              PRMA Code
             </Logo>
 
             <NavLinks>

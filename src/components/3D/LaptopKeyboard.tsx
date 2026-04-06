@@ -26,10 +26,8 @@
  *
  * 4. Layout QWERTY:
  *    As teclas são posicionadas em 4 linhas (como um teclado real):
- *    - Linha 1: Q W E R T Y U I O P  (10 teclas)
- *    - Linha 2:  A S D F G H J K L   (9 teclas, offset horizontal)
- *    - Linha 3:   Z X C V B N M      (7 teclas, offset maior)
- *    - Linha 4:     [espaço]          (barra separada, geometria diferente)
+ *    - Linha 1-5: Q W E R T Y U I O P  (12 teclas)
+ *    - Linha 6:     [touchpad]         (espaço separado, geometria diferente)
  *
  *    O offset horizontal de cada linha simula o escalonamento real
  *    de um teclado QWERTY (cada linha começa um pouco mais à direita).
@@ -62,7 +60,7 @@ const KEY_DEPTH = 0.02;
 const KEY_GAP = 0.02;
 const ROW_GAP = 0.03;
 const KEY_RADIUS = 0.02;
-const SPACE_BAR_HEIGHT = 0.44;
+const TOUCH_PAD_HEIGHT = 0.44;
 
 export default function LaptopKeyboard({ color = "#2a2a3e" }: LaptopKeyboardProps) {
   const meshRef = useRef<InstancedMesh>(null);
@@ -139,12 +137,12 @@ export default function LaptopKeyboard({ color = "#2a2a3e" }: LaptopKeyboardProp
   }, [keyPositions]);
 
   /**
-   * Barra de espaço — posição e largura.
+   * Touchpad — posição e largura.
    * Fica abaixo das 3 linhas de letras.
    * Largura = 5 teclas + 4 gaps (proporção real de um teclado).
    */
-  const spaceBarY = -ROWS.length * (KEY_HEIGHT + ROW_GAP * 2.2); // um pouco abaixo da última linha
-  const spaceBarWidth = KEY_WIDTH * 5 + KEY_GAP * 4;
+  const touchPadY = -ROWS.length * (KEY_HEIGHT + ROW_GAP * 2.2); // um pouco abaixo da última linha
+  const touchPadWidth = KEY_WIDTH * 5 + KEY_GAP * 4;
 
   return (
     <group>
@@ -161,16 +159,16 @@ export default function LaptopKeyboard({ color = "#2a2a3e" }: LaptopKeyboardProp
       </instancedMesh>
 
       {/**
-       * BARRA DE ESPAÇO — Mesh separado
+       * TOUCHPAD — Mesh separado
        *
        * Geometria diferente (mais larga que as teclas normais),
        * então não pode ser instância do mesmo InstancedMesh.
        */}
       <RoundedBox
-        args={[spaceBarWidth, SPACE_BAR_HEIGHT, KEY_DEPTH]}
+        args={[touchPadWidth, TOUCH_PAD_HEIGHT, KEY_DEPTH]}
         radius={KEY_RADIUS}
         smoothness={2}
-        position={[0, spaceBarY, 0]}
+        position={[0, touchPadY, 0]}
       >
         <meshStandardMaterial color={color} roughness={0.6} metalness={0.1} />
       </RoundedBox>

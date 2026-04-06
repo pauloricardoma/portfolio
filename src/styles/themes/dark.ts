@@ -1,15 +1,3 @@
-/**
- * dark.ts — Tema escuro.
- *
- * No dark mode, a lógica se inverte:
- * - Surfaces ficam escuras (#0A0E17, #111827)
- * - Texto fica claro (onSurface: branco/cinza claro)
- * - Primary fica mais claro pra manter contraste sobre fundo escuro
- * - Hover states clareiam em vez de escurecer
- *
- * O color-mix agora mistura com preto ou com a surface escura
- * em vez de branco, pra gerar os estados corretamente.
- */
 import type { ITheme } from "./types";
 
 const dark: ITheme = {

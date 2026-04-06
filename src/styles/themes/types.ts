@@ -1,9 +1,4 @@
 /**
- * types.ts — Interface do tema.
- *
- * Define a estrutura de cores que TODOS os temas (light e dark) devem seguir.
- * Isso garante que ao trocar de tema, nenhuma cor fica faltando.
- *
  * Nomenclatura (Material Design pattern):
  * - "primary" = cor de ação principal (botões, links, destaques)
  * - "onPrimary" = cor do texto/ícone SOBRE o primary (contraste)

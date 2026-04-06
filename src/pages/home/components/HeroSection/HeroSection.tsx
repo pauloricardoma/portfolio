@@ -146,7 +146,7 @@ export default function HeroSection() {
             </Text>
 
             <HeroSubtitle className="hero-subtitle">
-              +4 anos construindo aplicações web e mobile de alta complexidade
+              Especialista em construção de aplicações web e mobile de alta complexidade
               com React, TypeScript e Node.js — do desenho da solução à entrega em produção.
             </HeroSubtitle>
           </HeroContent>

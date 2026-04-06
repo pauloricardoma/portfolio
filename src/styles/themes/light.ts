@@ -1,16 +1,3 @@
-/**
- * light.ts — Tema claro.
- *
- * Cada grupo de cores segue o padrão Material:
- * - A cor base (ex: primary)
- * - Variantes de estado (hover, pressed, outline) geradas com color-mix()
- * - Cor "on" = texto/ícone que aparece SOBRE a cor base (garante contraste)
- * - "Container" = versão suave para fundos (baixa opacidade da cor)
- *
- * color-mix(in srgb, corA percentual, corB) mistura duas cores no espaço sRGB.
- * Ex: color-mix(in srgb, #0F2B5B 12%, #FFFFFF) = azul marinho com 12% de opacidade sobre branco.
- * Usamos isso pra gerar hovers e pressed states sem precisar definir cada hex manualmente.
- */
 import type { ITheme } from "./types";
 
 const light: ITheme = {

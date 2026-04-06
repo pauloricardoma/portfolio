@@ -1,13 +1,3 @@
-/**
- * Header/styles.ts
- *
- * O Header usa backdrop-filter: blur() — isso faz o fundo ficar
- * "embaçado" (glassmorphism). O conteúdo atrás do header fica
- * visível mas desfocado, dando um visual moderno.
- *
- * O header é position: fixed — sempre visível no topo.
- * z-index: 100 — fica acima de todo o conteúdo (incluindo o Canvas 3D).
- */
 import styled, { css } from "styled-components";
 import { spacing, breakpoints, borderRadius } from "~/styles/tokens";
 
@@ -52,7 +42,6 @@ export const Logo = styled.a`
   letter-spacing: -0.5px;
 `;
 
-/** Nav links — escondidos no mobile */
 export const NavLinks = styled.nav`
   display: none;
   gap: ${spacing.lg}px;
@@ -81,9 +70,6 @@ export const HeaderActions = styled.div`
   gap: ${spacing.sm}px;
 `;
 
-/**
- * Toggle de tema — botão circular que alterna entre sol (light) e lua (dark).
- */
 export const ThemeToggle = styled.button`
   width: 36px;
   height: 36px;
@@ -104,7 +90,6 @@ export const ThemeToggle = styled.button`
   }
 `;
 
-/** Hamburger — visível apenas no mobile */
 export const HamburgerButton = styled.button`
   width: 36px;
   height: 36px;
@@ -123,7 +108,6 @@ export const HamburgerButton = styled.button`
   }
 `;
 
-/** Menu mobile — slide down */
 interface MobileMenuProps {
   $open: boolean;
 }

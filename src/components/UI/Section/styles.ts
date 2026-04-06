@@ -1,12 +1,3 @@
-/**
- * Section/styles.ts — Wrapper de seção.
- *
- * Cada seção do portfólio (Hero, Projetos, Skills, Contato) é envolvida
- * por esse componente que aplica padding vertical consistente.
- *
- * $fullHeight: quando true, faz a seção ocupar 100vh (tela inteira).
- * Útil pro Hero.
- */
 import styled from "styled-components";
 import { spacing } from "~/styles/tokens";
 

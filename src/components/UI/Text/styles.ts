@@ -1,13 +1,3 @@
-/**
- * Text/styles.ts — Estilos do componente de tipografia.
- *
- * Em vez de usar a prop "as" do styled-components (que tem problemas
- * de tipagem com generics), exportamos os estilos como CSS puro
- * e o componente Text.tsx renderiza a tag HTML correta diretamente.
- *
- * As variantes controlam font-size, font-weight e line-height
- * usando os tokens que definimos em tokens.ts.
- */
 import { fontSize, fontWeight, lineHeight } from "~/styles/tokens";
 
 export type TextVariant =
@@ -21,11 +11,6 @@ export type TextVariant =
   | "bodySmall"
   | "caption";
 
-/**
- * Mapa de estilos por variante.
- * Cada variante define size, weight e lineHeight.
- * "hero" e "display" são pra títulos grandes com impacto visual.
- */
 export const variantStyles: Record<
   TextVariant,
   { size: number; weight: number; lh: number }
@@ -41,7 +26,6 @@ export const variantStyles: Record<
   caption: { size: fontSize.xs, weight: fontWeight.regular, lh: lineHeight.normal },
 };
 
-/** Mapa: variante → tag HTML semântica */
 export const variantTag: Record<TextVariant, keyof React.JSX.IntrinsicElements> = {
   hero: "h1",
   display: "h1",

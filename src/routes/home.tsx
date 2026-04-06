@@ -7,7 +7,7 @@ export function meta({}: Route.MetaArgs) {
     {
       name: "description",
       content:
-        "Portfolio de Paulo Ricardo Almeida — Software Engineer com +4 anos de experiência em React, TypeScript, React Native e Node.js.",
+        "Portfolio de Paulo Ricardo Almeida — Software Engineer especialista em React, TypeScript, React Native e Node.js.",
     },
   ];
 }

@@ -1,19 +1,3 @@
-/**
- * Text.tsx — Componente de tipografia.
- *
- * Renderiza texto com a tag HTML semântica correta baseada na variante.
- * Isso é importante pra acessibilidade e SEO:
- * - h1-h4 usam as tags <h1>-<h4> (headings reais)
- * - body/bodySmall usam <p> (parágrafo)
- * - caption usa <span> (inline)
- *
- * Em vez de usar styled-components com prop "as" (que causa conflitos
- * de tipagem), usamos createElement do React pra renderizar a tag certa
- * e aplicamos os estilos inline calculados a partir dos tokens.
- *
- * styled-components ainda é usado via className (se passado pelo pai),
- * mas o estilo base vem dos tokens — isso é mais performático e type-safe.
- */
 import { createElement, type ReactNode } from "react";
 import { useTheme } from "styled-components";
 import { fontWeight as fontWeightTokens } from "~/styles/tokens";

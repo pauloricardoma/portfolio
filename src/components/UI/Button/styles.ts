@@ -1,12 +1,3 @@
-/**
- * Button/styles.ts — Estilos do botão.
- *
- * Usa o helper css`` do styled-components pra aplicar blocos de CSS
- * condicionalmente. Cada variante (primary, secondary, ghost) é um
- * bloco css`` separado, ativado pela prop $variant.
- *
- * Padrão do Coordly: variantes via css`` condicional.
- */
 import styled, { css } from "styled-components";
 import { fontSize, fontWeight, borderRadius, spacing } from "~/styles/tokens";
 
@@ -47,7 +38,6 @@ export const StyledButton = styled.button<StyledButtonProps>`
 
   ${({ $size }) => sizeStyles[$size]}
 
-  /* Variante Primary — fundo azul, texto branco */
   ${({ $variant }) =>
     $variant === "primary" &&
     css`
@@ -62,7 +52,6 @@ export const StyledButton = styled.button<StyledButtonProps>`
       }
     `}
 
-  /* Variante Secondary — fundo cinza claro, texto escuro */
   ${({ $variant }) =>
     $variant === "secondary" &&
     css`
@@ -74,7 +63,6 @@ export const StyledButton = styled.button<StyledButtonProps>`
       }
     `}
 
-  /* Variante Ghost — transparente, só texto com cor primary */
   ${({ $variant }) =>
     $variant === "ghost" &&
     css`

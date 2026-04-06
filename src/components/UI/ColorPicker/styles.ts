@@ -5,11 +5,6 @@ export const PickerWrapper = styled.div`
   position: relative;
 `;
 
-/**
- * Botão que abre o picker — mostra a cor atual como preview.
- * O gradiente cônico (conic-gradient) simula um mini color wheel
- * quando nenhuma cor custom está selecionada.
- */
 export const PickerTrigger = styled.button<{ $color?: string }>`
   width: 36px;
   height: 36px;
@@ -33,10 +28,6 @@ export const PickerTrigger = styled.button<{ $color?: string }>`
   }
 `;
 
-/**
- * Dropdown com as opções de cor.
- * Aparece abaixo do botão com uma animação de scale + fade.
- */
 interface DropdownProps {
   $open: boolean;
 }
@@ -75,7 +66,6 @@ export const PickerLabel = styled.span`
   display: block;
 `;
 
-/** Grid de cores predefinidas */
 export const PresetGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -110,10 +100,6 @@ export const PresetSwatch = styled.button<PresetSwatchProps>`
   }
 `;
 
-/**
- * Input nativo type="color" — abre o color picker do sistema.
- * Estilizado pra parecer um botão, escondendo o visual padrão.
- */
 export const CustomColorRow = styled.div`
   display: flex;
   align-items: center;
@@ -131,7 +117,6 @@ export const NativeColorInput = styled.input`
   padding: 0;
   background: none;
 
-  /* Esconde o visual padrão do input color */
   &::-webkit-color-swatch-wrapper {
     padding: 0;
   }

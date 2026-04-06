@@ -1,9 +1,3 @@
-/**
- * useHome.ts — ViewModel da Home (padrão MVVM).
- *
- * Dados reais extraídos do CV de Paulo Ricardo Almeida.
- * Três projetos baseados nas empresas: Coordly, La Fabrique, Codemobile.
- */
 import { useState, useCallback } from "react";
 import type { IProject } from "~/interfaces/home/IProject";
 import type { ISkillCategory } from "./components/SkillsSection/SkillCategory";
@@ -38,9 +32,6 @@ const projects: IProject[] = [
   },
 ];
 
-/**
- * Skills organizadas por categoria — baseadas no stack real do CV.
- */
 const skillCategories: ISkillCategory[] = [
   {
     name: "Frontend",
@@ -65,7 +56,8 @@ const skillCategories: ISkillCategory[] = [
       "React Native",
       "Kotlin",
       "Android Nativo",
-      "Firebase Push",
+      "iOS Nativo",
+      "Firebase",
       "Módulos Nativos",
       "Publicação Stores",
     ],
