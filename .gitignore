@@ -5,3 +5,13 @@
 # React Router
 /.react-router/
 /build/
+
+# Editor
+/.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Private files
+/cv/
+/.claude/
