@@ -55,16 +55,21 @@ export default function Scene({ children, className }: SceneProps) {
       camera={{ position: [0, 0, 8], fov: 45 }}
       /**
        * dpr: Device Pixel Ratio — resolução de renderização.
-       * [1, 2] = usa até 2x em telas retina (nítido sem gastar demais).
-       * Em telas 3x (iPhones), limita a 2x pra manter performance.
+       * [1, 1.5] = limita a 1.5x mesmo em telas 2x/3x.
+       * 1.5x é o sweet spot: visualmente quase igual a 2x,
+       * mas renderiza ~56% menos pixels (1.5² vs 2² = 2.25 vs 4).
+       * Em mobile (GPU fraca), essa diferença é enorme.
        */
-      dpr={[1, 2]}
+      dpr={[1, 1.5]}
       /**
        * gl: configurações do WebGL renderer.
-       * antialias: suaviza bordas serrilhadas dos objetos 3D.
+       * antialias: DESATIVADO — caro em GPUs mobile. Com dpr 1.5x
+       * a densidade de pixels já suaviza bastante as bordas.
+       * powerPreference "high-performance": pede a GPU dedicada
+       * quando disponível (em laptops com 2 GPUs).
        * alpha: fundo transparente (mostra o background do CSS por trás).
        */
-      gl={{ antialias: true, alpha: true }}
+      gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       style={{ background: "transparent" }}
     >
       {/**

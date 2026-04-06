@@ -19,14 +19,18 @@ export const ProjectsSectionWrapper = styled.div`
 /** Container do Canvas 3D — precisa de altura fixa */
 export const CanvasContainer = styled.div`
   width: 100%;
-  height: 500px;
-  cursor: grab;
-
-  &:active {
-    cursor: grabbing;
-  }
+  height: 350px;
 
   @media (min-width: ${breakpoints.tablet}px) {
+    height: 500px;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  @media (min-width: ${breakpoints.desktop}px) {
     height: 600px;
   }
 `;
@@ -128,9 +132,13 @@ export const NavArrow = styled.button`
  * entre fallback e conteúdo real pra reduzir CLS.
  */
 export const ProjectsFallback = styled.div`
-  min-height: 938px;
+  min-height: 788px;
 
   @media (min-width: ${breakpoints.tablet}px) {
+    min-height: 938px;
+  }
+
+  @media (min-width: ${breakpoints.desktop}px) {
     min-height: 1038px;
   }
 `;

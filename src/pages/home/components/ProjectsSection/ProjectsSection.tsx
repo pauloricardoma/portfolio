@@ -34,6 +34,7 @@ import {
   NavArrow,
 } from "./styles";
 import type { IProject } from "~/interfaces/home/IProject";
+import useIsMobile from "~/hooks/useIsMobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,6 +50,7 @@ export default function ProjectsSection({
   onFocusChange,
 }: ProjectsSectionProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   /**
    * Animação de entrada da seção inteira via ScrollTrigger.
@@ -144,6 +146,9 @@ export default function ProjectsSection({
                 projects={projects}
                 focusedIndex={focusedIndex}
                 onFocusChange={onFocusChange}
+                dragEnabled={!isMobile}
+                orbitRadius={isMobile ? 3.8 : 3.2}
+                laptopScale={isMobile ? 1.0 : 1.3}
               />
             </Scene>
           </Suspense>

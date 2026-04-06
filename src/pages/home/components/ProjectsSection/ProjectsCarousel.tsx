@@ -35,8 +35,8 @@
  *    onPointerDown/Move/Up pra drag horizontal → gira o carrossel.
  *    Click em um dispositivo → anima até ele ficar na frente.
  */
-import { useRef, useState, useCallback } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useRef, useCallback, useEffect } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useTheme } from "styled-components";
 import gsap from "gsap";
 import type { Group } from "three";
@@ -50,6 +50,12 @@ interface ProjectsCarouselProps {
   onFocusChange: (index: number) => void;
   /** Índice do projeto em foco */
   focusedIndex: number;
+  /** Desabilita drag (mobile — pra não bloquear scroll da página) */
+  dragEnabled?: boolean;
+  /** Raio do círculo orbital — maior = devices mais afastados do centro */
+  orbitRadius?: number;
+  /** Escala do laptop (default 1.3, no mobile menor pra não cobrir os de trás) */
+  laptopScale?: number;
 }
 
 /** Raio do círculo orbital (distância do centro) */
@@ -59,8 +65,12 @@ export default function ProjectsCarousel({
   projects,
   onFocusChange,
   focusedIndex,
+  dragEnabled = true,
+  orbitRadius = ORBIT_RADIUS,
+  laptopScale = 1.3,
 }: ProjectsCarouselProps) {
   const theme = useTheme();
+  const radius = orbitRadius;
 
   /**
    * angleRef: ângulo atual do carrossel (em radianos).
@@ -154,8 +164,8 @@ export default function ProjectsCarousel({
        * y = 0 (todos no mesmo nível vertical)
        */
       const itemAngle = i * anglePerItem + angleRef.current;
-      const x = Math.sin(itemAngle) * ORBIT_RADIUS;
-      const z = Math.cos(itemAngle) * ORBIT_RADIUS;
+      const x = Math.sin(itemAngle) * radius;
+      const z = Math.cos(itemAngle) * radius;
 
       device.position.x = x;
       device.position.z = z;
@@ -163,32 +173,21 @@ export default function ProjectsCarousel({
       /**
        * ESCALA baseada na profundidade (z):
        *
-       * z varia de -ORBIT_RADIUS (atrás) a +ORBIT_RADIUS (frente).
-       * Normalizamos pra 0-1: (z + RAIO) / (2 × RAIO)
+       * z varia de -radius (atrás) a +radius (frente).
+       * Normalizamos pra 0-1: (z + raio) / (2 × raio)
        * Depois mapeamos pra escala: 0.6 (atrás) a 1.1 (frente)
-       *
-       * Isso cria perspectiva natural: perto = grande, longe = pequeno.
        */
-      const normalizedZ = (z + ORBIT_RADIUS) / (ORBIT_RADIUS * 2);
+      const normalizedZ = (z + radius) / (radius * 2);
       const scale = 0.6 + normalizedZ * 0.5;
       device.scale.setScalar(scale);
 
       /**
-       * OPACIDADE baseada na profundidade:
-       * Itens atrás ficam mais transparentes.
-       * Isso reforça a sensação de profundidade.
-       *
-       * Acessamos o material dos filhos (meshes) do grupo
-       * e ajustamos a opacidade.
+       * NOTA: o traverse que existia aqui percorria TODOS os filhos
+       * de cada device a cada frame (60fps) só pra setar opacity=1.
+       * Isso é extremamente pesado em mobile — removido.
+       * Se precisar de opacidade por profundidade no futuro,
+       * setar uma vez no mount e atualizar só quando mudar.
        */
-      device.traverse((child) => {
-        if ("material" in child && child.material) {
-          const mat = child.material as { opacity: number; transparent: boolean };
-          mat.transparent = true;
-          mat.opacity = 1;
-          // mat.opacity = 0.4 + normalizedZ * 0.6;
-        }
-      });
 
       /**
        * ROTAÇÃO Y: o dispositivo fica de frente pra câmera quando está na posição frontal.
@@ -210,35 +209,14 @@ export default function ProjectsCarousel({
    * setPointerCapture: garante que o mouse continua capturado
    * mesmo se sair do Canvas (evita o drag "travar").
    */
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      isDragging.current = true;
-      dragStartX.current = e.clientX;
-      dragStartAngle.current = targetAngleRef.current;
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    },
-    []
-  );
-
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (!isDragging.current) return;
-      const deltaX = e.clientX - dragStartX.current;
-      targetAngleRef.current = dragStartAngle.current + deltaX * 0.01;
-    },
-    []
-  );
-
-  const handlePointerUp = useCallback(() => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
-
-    /**
-     * Snap to nearest — ao soltar o drag, "encaixa" no item mais próximo.
-     *
-     * Dividimos o ângulo atual pelo ângulo por item e arredondamos.
-     * Isso dá o índice do item mais próximo da posição frontal.
-     */
+  /**
+   * snapToNearest — "encaixa" no item mais próximo da frente.
+   *
+   * Dividimos o ângulo atual pelo ângulo por item e arredondamos.
+   * Isso dá o índice do item mais próximo da posição frontal.
+   * Extraímos numa função separada pra reutilizar em pointerUp e pointerLeave.
+   */
+  const snapToNearest = useCallback(() => {
     const currentAngle = targetAngleRef.current;
     const nearestIndex =
       Math.round(-currentAngle / anglePerItem) % projects.length;
@@ -248,13 +226,75 @@ export default function ProjectsCarousel({
     navigateTo(normalizedIndex);
   }, [anglePerItem, projects.length, navigateTo]);
 
+  /**
+   * DRAG VIA EVENTOS DOM NO CANVAS
+   *
+   * Por que NÃO usar onPointerDown/Move/Up do R3F (no <group>)?
+   * Porque em R3F esses eventos são por MESH — se o pointer sai de um
+   * mesh pro espaço vazio (ou entre meshes), dispara onPointerLeave
+   * e o drag cancela no meio. Isso causa o bug de "girar e voltar".
+   *
+   * Solução: escutar pointer events direto no <canvas> DOM via useThree().
+   * O canvas é um elemento HTML contínuo — não tem "buracos" entre meshes.
+   * Pointer capture no canvas garante que move/up chegam mesmo se o
+   * pointer sair da janela.
+   */
+  const { gl } = useThree();
+
+  useEffect(() => {
+    /**
+     * Sem drag (mobile): não registra nenhum evento no canvas.
+     * O scroll da página funciona normalmente.
+     * Navegação é feita só por click nos devices, dots e setas.
+     */
+    if (!dragEnabled) return;
+
+    const canvas = gl.domElement;
+
+    const handlePointerDown = (e: PointerEvent) => {
+      isDragging.current = true;
+      dragStartX.current = e.clientX;
+      dragStartAngle.current = targetAngleRef.current;
+      canvas.setPointerCapture(e.pointerId);
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isDragging.current) return;
+      const deltaX = e.clientX - dragStartX.current;
+      targetAngleRef.current = dragStartAngle.current + deltaX * 0.01;
+    };
+
+    const handlePointerUp = () => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      snapToNearest();
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging.current) {
+        e.preventDefault();
+      }
+    };
+
+    canvas.addEventListener("pointerdown", handlePointerDown);
+    canvas.addEventListener("pointermove", handlePointerMove);
+    canvas.addEventListener("pointerup", handlePointerUp);
+    canvas.addEventListener("pointercancel", handlePointerUp);
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.style.touchAction = "none";
+
+    return () => {
+      canvas.removeEventListener("pointerdown", handlePointerDown);
+      canvas.removeEventListener("pointermove", handlePointerMove);
+      canvas.removeEventListener("pointerup", handlePointerUp);
+      canvas.removeEventListener("pointercancel", handlePointerUp);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.style.touchAction = "";
+    };
+  }, [gl, snapToNearest, dragEnabled]);
+
   return (
-    <group
-      ref={groupRef}
-      onPointerDown={handlePointerDown as unknown as (e: any) => void}
-      onPointerMove={handlePointerMove as unknown as (e: any) => void}
-      onPointerUp={handlePointerUp as unknown as () => void}
-    >
+    <group ref={groupRef}>
       {projects.map((project, index) => (
         <group
           key={project.id}
@@ -273,7 +313,7 @@ export default function ProjectsCarousel({
           {project.type === "mobile" ? (
             <DevicePhone screenTexture={project.screenshot} color={theme.colors.tertiary.tertiary} />
           ) : (
-            <DeviceLaptop screenTexture={project.screenshot} color={theme.colors.tertiary.tertiary} />
+            <DeviceLaptop screenTexture={project.screenshot} color={theme.colors.tertiary.tertiary} scale={laptopScale} />
           )}
         </group>
       ))}
