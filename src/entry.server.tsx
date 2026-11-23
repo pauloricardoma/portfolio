@@ -15,9 +15,11 @@ const handleRequest: HandleDocumentRequestFunction = (
   /**
    * CSP com nonce por requisição (spec 0003, ADR 0005). Os headers entram
    * ANTES do render, para valerem também em erro e timeout.
+   * `import.meta.env.PROD` é fixado pelo Vite no build: a function da Netlify
+   * não define NODE_ENV em runtime, então `process.env` não serve aqui.
    */
   const nonce = createNonce();
-  const headers = securityHeaders(nonce, process.env.NODE_ENV === "production");
+  const headers = securityHeaders(nonce, import.meta.env.PROD);
   for (const [name, value] of Object.entries(headers)) responseHeaders.set(name, value);
 
   const sheet = new ServerStyleSheet();
