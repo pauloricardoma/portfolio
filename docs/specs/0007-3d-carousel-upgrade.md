@@ -1,9 +1,9 @@
 # Spec 0007 — Carrossel 3D do portfólio mais detalhado e fluido
 
-- **Status:** rascunho
+- **Status:** planejada (aprovada em 23/11/2026)
 - **Pedido original:** "queria que a gente melhorasse o que temos, ficasse mais detalhado, mais fluido, pra mostrar expertise com 3D também. bora com uma feature nova pra isso" / "Precisamos do plano de melhorar o carrousel 3d"
 - **Data:** 23/11/2026
-- **Planos:** —
+- **Planos:** 06, 07
 - **Depende de:** 0006 (palco, controles, interface `activeIndex`/`onSelect`/cores em hex, fallback sem WebGL). O plano desta spec só começa com o plano 05 concluído.
 
 ## 1. Problema
@@ -18,11 +18,11 @@ Decisões do usuário (23/11/2026): modelagem própria, sem GLTF de terceiros; a
    - Celular: corpo com bordas chanfradas e laterais metálicas, tela inset com cantos arredondados e ilha/notch, módulo de câmera traseiro, botões laterais.
    - Notebook: base com teclado (o `LaptopKeyboard` atual, refinado), trackpad, tampa com moldura e câmera, dobradiça que articula.
    - Tela com a screenshot do projeto, sem ser escurecida pela luz e com um reflexo sutil por cima.
-2. **Luz e materiais:** materiais PBR (metal escovado, vidro, alumínio anodizado nas cores do tema); ambiente de estúdio montado em código (`<Environment>` do drei **só com `Lightformer`**, sem `preset` nem `files`, que baixariam HDR de CDN); sombra de contato no "piso" do palco. Cores por `themeMode` (claro e escuro), em hex vindo de `tokens.colors`.
+2. **Luz e materiais:** materiais PBR (metal escovado, vidro, alumínio anodizado nas cores do tema); ambiente de estúdio montado em código (`<Environment>` do drei **só com `Lightformer`**, sem `preset` nem `files`, que baixariam HDR de CDN); sombra de contato no "piso" do palco (mancha suave sob cada aparelho; ver ADR 0004). Cores por `themeMode` (claro e escuro), em hex vindo de `tokens.colors`.
 3. **Entrada ao rolar:** quando o palco entra na tela pela primeira vez, os aparelhos sobem com escalonamento e a tampa do notebook abre (`ENTRANCE_DURATION`, 1,2s). Acontece uma vez por sessão (`sessionStorage`); trocar de idioma ou voltar à página não repete.
 4. **Arraste com inércia:** arrastar gira o carrossel; ao soltar, o giro continua com a velocidade do gesto, desacelera (`INERTIA_FRICTION`) e encaixa no aparelho mais próximo, que vira o ativo. No palco, `touch-action: pan-y`: o gesto só vira giro quando o deslocamento horizontal passa de `DRAG_START_PX` (10px) e o ângulo do gesto fica abaixo de `DRAG_MAX_ANGLE` (30° da horizontal); senão, é rolagem da página e o carrossel ignora. Nada de `preventDefault` em `touchmove`.
 5. **Parallax do cursor:** com mouse sobre o palco, a cena inclina até `PARALLAX_MAX_DEG` (4°) seguindo o ponteiro, com amortecimento; o aparelho ativo flutua de leve. Sem efeito em toque.
-6. **Pós-processamento:** profundidade de campo leve (foco no aparelho ativo) e bloom sutil só em realces emissivos (LED da câmera, reflexos do metal). A tela com a screenshot fica **fora** do bloom (seleção por camada), para não estourar screenshot clara no tema claro. Ligado só quando `(pointer: fine)` e o `PerformanceMonitor` do drei não detecta queda; desligado no celular.
+6. **Pós-processamento:** profundidade de campo leve (foco no aparelho ativo) e bloom sutil só em realces emissivos (LED da câmera, reflexos do metal). A tela com a screenshot fica **fora** do bloom (seleção por camada), para não estourar screenshot clara no tema claro. Ligado só quando `(pointer: fine)` e o `PerformanceMonitor` do drei não detecta queda; desligado no celular. *(Execução, plano 06: a profundidade de campo saiu porque apagava o alpha do canvas e o palco ficava preto; a tela fica fora do bloom por limiar de luminância (tela ≤ 1, `toneMapped=false`), não por camada. Ver ADR 0004.)*
 7. **Troca de projeto** (botões, dots, teclado, clique): transição com mola/ease, sem salto. **O último comando vence:** um comando durante a inércia ou durante a mola cancela o movimento em curso e segue para o novo alvo.
 8. **Clique × arraste:** um gesto que moveu menos de `CLICK_MAX_PX` (6px) é clique (seleciona o aparelho); acima disso é arraste e não dispara clique no fim.
 
@@ -79,7 +79,7 @@ Sem banco nem arquivos novos de dados. Nenhum modelo, textura ou HDR baixado.
 - [ ] Desktop: ≥ 55 FPS médios durante o arraste (Performance do DevTools). Mobile emulado com CPU 4×: ≥ 30 FPS.
 - [ ] Com o palco fora da tela, o Performance mostra o loop de render parado.
 - [ ] O chunk lazy da cena com a lib nova fica abaixo de 330 KB gzip (base em 23/11/2026: 235 KB), e a home não carrega nada dele (`yarn build`).
-- [ ] As funções de `carouselMath.ts` (ângulo → índice, encaixe, inércia) são puras e conferidas com casos de borda (índice negativo, loop, velocidade zero).
+- [ ] As funções de `carouselMath.ts` (ângulo → índice, encaixe, inércia, caminho mais curto) são puras e têm testes Vitest com casos de borda (índice negativo, loop, velocidade zero); `yarn test` passa.
 - [ ] `yarn typecheck` e `yarn build` passam.
 
 ## 9. Fora do escopo
@@ -91,6 +91,6 @@ Sem banco nem arquivos novos de dados. Nenhum modelo, textura ou HDR baixado.
 
 ## 10. Perguntas abertas
 
-- O projeto não tem test runner. Testar `carouselMath.ts` com Vitest (devDependency) ou só conferir no navegador? → **com o usuário**. Recomendação: Vitest, porque é a primeira lógica pura com casos de borda (loop, índice negativo, velocidade zero).
-- Manter Three.js em vez do CSS 3D do handoff, com orçamento de bundle e política de degradação → ADR depois da aprovação (junto com a 0006).
-- `@react-three/postprocessing`: fixar a versão compatível com `three@0.183` e `@react-three/fiber@9` no plano, depois da checagem da `seguranca.md` §4.
+- ~~Test runner~~ → **decidido (usuário, 23/11/2026): Vitest** como devDependency, com script `yarn test`, para testar `carouselMath.ts`.
+- ~~Three.js × CSS 3D~~ → ADR 0004 (23/11/2026).
+- ~~Versão do postprocessing~~ → `@react-three/postprocessing@^3.2.2` + `postprocessing@^6.39`, com `@react-three/fiber` em `^9.8` (plano 06).
