@@ -1,6 +1,6 @@
 # Spec 0007 — Carrossel 3D do portfólio mais detalhado e fluido
 
-- **Status:** planejada (aprovada em 23/11/2026)
+- **Status:** concluída (aprovada em 23/11/2026)
 - **Pedido original:** "queria que a gente melhorasse o que temos, ficasse mais detalhado, mais fluido, pra mostrar expertise com 3D também. bora com uma feature nova pra isso" / "Precisamos do plano de melhorar o carrousel 3d"
 - **Data:** 23/11/2026
 - **Planos:** 06, 07

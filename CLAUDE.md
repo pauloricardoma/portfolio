@@ -37,6 +37,7 @@ public/                       og-image.png, favicon.{svg,ico}, apple-touch-icon.
 yarn dev         # dev server
 yarn build       # build de produção (saída para a Netlify)
 yarn typecheck   # typegen + tsc
+yarn test        # Vitest (lógica pura, src/**/*.test.ts; config própria em vitest.config.ts)
 ```
 
 `yarn start` não funciona com o plugin da Netlify (ver spec 0003).

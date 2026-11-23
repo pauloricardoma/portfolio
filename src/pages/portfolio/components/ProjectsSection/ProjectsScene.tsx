@@ -4,6 +4,7 @@
  */
 import { Suspense } from "react";
 import Scene from "~/components/3D/Scene";
+import type { SelectSource } from "~/components/3D/carouselMath";
 import { DEVICE_PALETTE, LIGHTS } from "~/components/3D/config";
 import { useSceneQuality } from "~/components/3D/useSceneQuality";
 import { useAppTheme } from "~/contexts/ThemeContext";
@@ -15,7 +16,8 @@ import ProjectsCarousel from "./ProjectsCarousel";
 interface ProjectsSceneProps {
   projects: IProject[];
   activeIndex: number;
-  onSelect: (index: number) => void;
+  /** `source` diz se veio de arraste ou clique na cena */
+  onSelect: (index: number, source?: SelectSource) => void;
 }
 
 export default function ProjectsScene({ projects, activeIndex, onSelect }: ProjectsSceneProps) {
@@ -33,7 +35,6 @@ export default function ProjectsScene({ projects, activeIndex, onSelect }: Proje
           activeIndex={activeIndex}
           onSelect={onSelect}
           palette={DEVICE_PALETTE[themeMode]}
-          dragEnabled={!isMobile}
           orbitRadius={isMobile ? 3.4 : 3.2}
           laptopScale={isMobile ? 0.7 : 1}
           phoneScale={isMobile ? 0.85 : 1.1}

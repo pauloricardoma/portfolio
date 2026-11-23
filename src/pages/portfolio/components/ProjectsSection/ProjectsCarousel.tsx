@@ -3,25 +3,32 @@
  *
  * CONCEITOS CHAVE:
  *
- * 1. POSICIONAMENTO EM CÍRCULO (trigonometria):
- *    Cada aparelho recebe um ângulo base = (index / total) × 2π e fica em
- *    x = raio × sin(ângulo), z = raio × cos(ângulo). Somando o ângulo atual
- *    do carrossel a todos, o conjunto gira mantendo as posições relativas.
+ * 1. POSIÇÃO EM CÍRCULO: o aparelho `i` fica no ângulo i × passo + ângulo do
+ *    carrossel; x = raio × sin, z = raio × cos. Mais perto da câmera = maior.
  *
- * 2. CONTROLADO DE FORA:
- *    O projeto ativo (`activeIndex`) mora no `usePortfolio`. Botões, dots,
- *    teclado, clique e arraste só pedem a troca com `onSelect`; o carrossel
- *    reage ao `activeIndex` girando pelo caminho mais curto.
+ * 2. CONTROLADO DE FORA: o projeto ativo (`activeIndex`) mora no
+ *    usePortfolio. A cena pede trocas com `onSelect(index, source)` e reage ao
+ *    `activeIndex`. "O último comando vence": um `activeIndex` novo vindo de
+ *    fora cancela inércia ou encaixe em curso e gira para ele.
  *
- * 3. GSAP + useFrame:
- *    O GSAP anima o ângulo-alvo (um ref, sem re-render) e o useFrame
- *    aproxima o ângulo atual do alvo a cada frame (lerp), o que dá inércia.
- *    Com reduced motion, o ângulo pula direto para o alvo.
+ * 3. MÁQUINA DE ESTADOS DO GIRO (phaseRef):
+ *    idle  → parado ou animando com GSAP até um alvo;
+ *    drag  → o alvo segue o dedo/mouse;
+ *    coast → solto com velocidade: inércia (carouselMath.inertiaStep) até a
+ *            velocidade cair, e aí encaixa no aparelho mais perto.
+ *    O ângulo desenhado persegue o alvo com amortecimento (sem saltos).
  *
- * 4. ESCALA POR PROFUNDIDADE: quanto mais perto da câmera (z maior), maior.
+ * 4. GESTO: pointer events no <canvas> com `touch-action: pan-y`. O gesto só
+ *    vira giro se for quase horizontal (classifyGesture); vertical é rolagem
+ *    da página e o carrossel ignora. Nada de preventDefault.
  *
- * 5. ARRASTE: eventos de pointer no <canvas> (não nos meshes, que perdem o
- *    pointer entre um objeto e outro). Ao soltar, encaixa no mais próximo.
+ * 5. ENTRADA (uma vez por sessão): quando o palco aparece, os aparelhos sobem
+ *    escalonados e a tampa do notebook abre.
+ *
+ * 6. PARALLAX (só mouse) e FLUTUAÇÃO do ativo. Com reduced motion, nada disso:
+ *    trocas e encaixes são instantâneos.
+ *
+ * Toda a matemática está em carouselMath.ts (testada com Vitest).
  */
 import { useRef, useCallback, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -31,42 +38,89 @@ import type { IProject } from "~/interfaces/portfolio/IProject";
 import DevicePhone from "~/components/3D/DevicePhone";
 import DeviceLaptop from "~/components/3D/DeviceLaptop";
 import FloorShadow from "~/components/3D/FloorShadow";
-import { FLOOR_Y, SHADOW_SIZE, type DevicePalette } from "~/components/3D/config";
+import {
+  CLICK_MAX_PX,
+  DRAG_MAX_ANGLE,
+  DRAG_SENSITIVITY,
+  DRAG_START_PX,
+  ENTRANCE_DURATION,
+  ENTRANCE_RISE,
+  ENTRANCE_SESSION_KEY,
+  ENTRANCE_STAGGER,
+  FLOAT_AMPLITUDE,
+  FLOAT_SPEED,
+  FLOOR_Y,
+  INERTIA_FRICTION,
+  LID_CLOSED,
+  LID_OPEN,
+  PARALLAX_DAMPING,
+  PARALLAX_MAX_DEG,
+  SELECT_DURATION,
+  SHADOW_SIZE,
+  SNAP_DURATION,
+  SNAP_VELOCITY,
+  VELOCITY_WINDOW_MS,
+  type DevicePalette,
+} from "~/components/3D/config";
+import {
+  angleForIndex,
+  classifyGesture,
+  inertiaStep,
+  shortestDelta,
+  snapTarget,
+  velocityFromSamples,
+  type AngleSample,
+  type SelectSource,
+} from "~/components/3D/carouselMath";
 
 const TWO_PI = Math.PI * 2;
-
-/** Arraste menor que isso (px) ainda conta como clique no aparelho */
-const CLICK_MAX_PX = 6;
-
-/** Sensibilidade do arraste: radianos por pixel */
-const DRAG_SENSITIVITY = 0.01;
+const PARALLAX_MAX_RAD = (PARALLAX_MAX_DEG * Math.PI) / 180;
 
 interface ProjectsCarouselProps {
   projects: IProject[];
   activeIndex: number;
   /** Pede a troca de projeto (o estado fica fora da cena) */
-  onSelect: (index: number) => void;
+  onSelect: (index: number, source: SelectSource) => void;
   /** Cores dos aparelhos em hex, por tema (Three.js não lê var(--…)) */
   palette: DevicePalette;
-  /** Desliga o arraste (no celular, para não bloquear a rolagem da página) */
-  dragEnabled?: boolean;
   /** Raio do círculo orbital: maior = aparelhos mais afastados do centro */
   orbitRadius?: number;
   /** Escala do notebook (menor no celular, para não cobrir os de trás) */
   laptopScale?: number;
   /** Escala do celular (menor no palco estreito do celular) */
   phoneScale?: number;
-  /** Troca instantânea, sem giro */
+  /** Sem entrada, inércia, parallax nem flutuação; trocas instantâneas */
   reducedMotion?: boolean;
   /** Sombra no piso (desliga no nível 2 de degradação) */
   shadows?: boolean;
   shadowOpacity?: number;
 }
 
-/** Diferença angular em [-π, π): o giro mais curto de `from` até `to` */
-function shortestDelta(from: number, to: number) {
-  const diff = (to - from) % TWO_PI;
-  return ((diff + 3 * Math.PI) % TWO_PI) - Math.PI;
+type Phase = "idle" | "drag" | "coast";
+
+interface Gesture {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  startAngle: number;
+  kind: "pending" | "drag";
+}
+
+/** A entrada já rodou nesta sessão? (sessionStorage pode não existir) */
+function entranceSeen() {
+  try {
+    return sessionStorage.getItem(ENTRANCE_SESSION_KEY) === "1";
+  } catch {
+    return true;
+  }
+}
+
+function markEntranceSeen() {
+  try {
+    sessionStorage.setItem(ENTRANCE_SESSION_KEY, "1");
+  } catch {
+    // sem sessionStorage: a entrada pode repetir, sem problema
+  }
 }
 
 export default function ProjectsCarousel({
@@ -74,7 +128,6 @@ export default function ProjectsCarousel({
   activeIndex,
   onSelect,
   palette,
-  dragEnabled = true,
   orbitRadius = 3.2,
   laptopScale = 1,
   phoneScale = 1.1,
@@ -85,49 +138,271 @@ export default function ProjectsCarousel({
   const radius = orbitRadius;
   const count = projects.length;
   const anglePerItem = TWO_PI / count;
+  const { gl } = useThree();
 
-  /**
-   * Dados que mudam todo frame ficam em ref (sem re-render).
-   * angleRef: ângulo desenhado. targetAngleRef: para onde ele está indo.
-   */
-  const angleRef = useRef(0);
-  const targetAngleRef = useRef(0);
+  /* ---------- Estado por frame (refs, sem re-render) ---------- */
+
+  /** Ângulo desenhado e o alvo que ele persegue */
+  const angleRef = useRef(angleForIndex(activeIndex, count));
+  const targetAngleRef = useRef(angleRef.current);
+  const phaseRef = useRef<Phase>("idle");
+  const velocityRef = useRef(0);
+  const samplesRef = useRef<AngleSample[]>([]);
+  const gestureRef = useRef<Gesture | null>(null);
+  /** Clique logo depois de um arraste não conta */
+  const suppressClickRef = useRef(false);
+  /** Índice que a própria cena escolheu (não precisa girar de novo) */
+  const selfSelectRef = useRef<number | null>(null);
+  const activeRef = useRef(activeIndex);
+  const reducedRef = useRef(reducedMotion);
+  reducedRef.current = reducedMotion;
+
+  const tiltRef = useRef<Group>(null);
+  const pointerRef = useRef({ x: 0, y: 0, inside: false, fine: false });
+
   const deviceRefs = useRef<(Group | null)[]>([]);
   const shadowRefs = useRef<(Mesh | null)[]>([]);
+  const hingeRefs = useRef<(Group | null)[]>([]);
 
-  const isDragging = useRef(false);
-  const dragStartX = useRef(0);
-  const dragStartAngle = useRef(0);
+  /** Progresso da entrada por aparelho (0 escondido → 1 no lugar) e da tampa */
+  const entranceRef = useRef({ devices: projects.map(() => 1), lid: 1 });
+
+  /* ---------- Giro ---------- */
+
+  /** Anima o alvo até `angle` (instantâneo com reduced motion) */
+  const tweenTarget = useCallback((angle: number, duration: number) => {
+    gsap.killTweensOf(targetAngleRef);
+    phaseRef.current = "idle";
+    if (reducedRef.current) {
+      targetAngleRef.current = angle;
+      angleRef.current = angle;
+      return;
+    }
+    gsap.to(targetAngleRef, { current: angle, duration, ease: "power3.out" });
+  }, []);
 
   /** Gira até o projeto `index` pelo caminho mais curto */
   const rotateTo = useCallback(
-    (index: number) => {
+    (index: number, duration = SELECT_DURATION) => {
       const from = targetAngleRef.current;
-      const to = from + shortestDelta(from, -index * anglePerItem);
-
-      gsap.killTweensOf(targetAngleRef);
-      if (reducedMotion) {
-        targetAngleRef.current = to;
-        angleRef.current = to;
-        return;
-      }
-      gsap.to(targetAngleRef, { current: to, duration: 0.8, ease: "power2.inOut" });
+      tweenTarget(from + shortestDelta(from, angleForIndex(index, count)), duration);
     },
-    [anglePerItem, reducedMotion]
+    [count, tweenTarget]
   );
 
+  /** Seleção que nasce na cena (arraste/clique) */
+  const selectFromScene = useCallback(
+    (index: number, source: SelectSource) => {
+      selfSelectRef.current = index;
+      onSelect(index, source);
+    },
+    [onSelect]
+  );
+
+  /** Encaixa no aparelho mais perto de onde o giro pararia */
+  const snap = useCallback(
+    (velocity: number) => {
+      const target = snapTarget(targetAngleRef.current, velocity, count, INERTIA_FRICTION);
+      tweenTarget(target.angle, SNAP_DURATION);
+      selectFromScene(target.index, "drag");
+    },
+    [count, tweenTarget, selectFromScene]
+  );
+
+  /** activeIndex vindo de fora: o último comando vence */
   useEffect(() => {
+    activeRef.current = activeIndex;
+    if (selfSelectRef.current === activeIndex) {
+      selfSelectRef.current = null;
+      return;
+    }
+    selfSelectRef.current = null;
     rotateTo(activeIndex);
   }, [activeIndex, rotateTo]);
 
-  useEffect(() => () => {
-    gsap.killTweensOf(targetAngleRef);
-  }, []);
+  useEffect(
+    () => () => {
+      gsap.killTweensOf(targetAngleRef);
+    },
+    []
+  );
 
-  useFrame(() => {
-    angleRef.current = reducedMotion
+  /* ---------- Entrada ao rolar (uma vez por sessão) ---------- */
+
+  useEffect(() => {
+    const entrance = entranceRef.current;
+    if (reducedMotion || entranceSeen()) {
+      entrance.devices.fill(1);
+      entrance.lid = 1;
+      return;
+    }
+
+    entrance.devices.fill(0);
+    entrance.lid = 0;
+    let timeline: gsap.core.Timeline | null = null;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        markEntranceSeen();
+
+        const rise = ENTRANCE_DURATION * 0.7;
+        timeline = gsap.timeline();
+        entrance.devices.forEach((_, i) => {
+          timeline!.to(entrance.devices, { [i]: 1, duration: rise, ease: "power3.out" }, i * ENTRANCE_STAGGER);
+        });
+        timeline.to(
+          entrance,
+          { lid: 1, duration: ENTRANCE_DURATION - rise * 0.5, ease: "power2.inOut" },
+          rise * 0.5
+        );
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(gl.domElement);
+
+    return () => {
+      observer.disconnect();
+      timeline?.progress(1).kill();
+    };
+  }, [gl, reducedMotion]);
+
+  /* ---------- Gestos no canvas ---------- */
+
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const pointer = pointerRef.current;
+    pointer.fine = window.matchMedia("(pointer: fine)").matches;
+
+    const updateParallax = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+      pointer.inside = true;
+    };
+
+    const handlePointerDown = (e: PointerEvent) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      gestureRef.current = {
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        startAngle: targetAngleRef.current,
+        kind: "pending",
+      };
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      updateParallax(e);
+      const gesture = gestureRef.current;
+      if (!gesture || gesture.pointerId !== e.pointerId) return;
+
+      const dx = e.clientX - gesture.startX;
+      const dy = e.clientY - gesture.startY;
+
+      if (gesture.kind === "pending") {
+        const kind = classifyGesture(dx, dy, { startPx: DRAG_START_PX, maxAngleDeg: DRAG_MAX_ANGLE });
+        if (kind === "pending") return;
+        if (kind === "scroll") {
+          // Rolagem da página: o carrossel sai do caminho
+          gestureRef.current = null;
+          return;
+        }
+        // Virou arraste: pega o carrossel onde ele estiver (cancela inércia/encaixe)
+        gesture.kind = "drag";
+        gsap.killTweensOf(targetAngleRef);
+        gesture.startAngle = targetAngleRef.current;
+        gesture.startX = e.clientX;
+        phaseRef.current = "drag";
+        samplesRef.current = [];
+        canvas.setPointerCapture(e.pointerId);
+      }
+
+      targetAngleRef.current = gesture.startAngle + (e.clientX - gesture.startX) * DRAG_SENSITIVITY;
+      const samples = samplesRef.current;
+      samples.push({ t: e.timeStamp, angle: targetAngleRef.current });
+      while (samples.length > 2 && e.timeStamp - samples[0].t > VELOCITY_WINDOW_MS) samples.shift();
+    };
+
+    const handlePointerEnd = (e: PointerEvent) => {
+      const gesture = gestureRef.current;
+      if (!gesture || gesture.pointerId !== e.pointerId) return;
+      gestureRef.current = null;
+      if (gesture.kind !== "drag") return;
+
+      suppressClickRef.current = true;
+      setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
+
+      // Amostras velhas (o dedo parou antes de soltar) não contam
+      const recent = samplesRef.current.filter((s) => e.timeStamp - s.t <= VELOCITY_WINDOW_MS);
+      const velocity = reducedRef.current ? 0 : velocityFromSamples(recent);
+
+      if (Math.abs(velocity) < SNAP_VELOCITY) {
+        snap(0);
+      } else {
+        velocityRef.current = velocity;
+        phaseRef.current = "coast";
+      }
+    };
+
+    const handlePointerLeave = () => {
+      pointer.inside = false;
+    };
+
+    canvas.addEventListener("pointerdown", handlePointerDown);
+    canvas.addEventListener("pointermove", handlePointerMove);
+    canvas.addEventListener("pointerup", handlePointerEnd);
+    canvas.addEventListener("pointercancel", handlePointerEnd);
+    canvas.addEventListener("pointerleave", handlePointerLeave);
+    // Vertical fica com o navegador (rolagem); horizontal chega como pointermove
+    canvas.style.touchAction = "pan-y";
+
+    return () => {
+      canvas.removeEventListener("pointerdown", handlePointerDown);
+      canvas.removeEventListener("pointermove", handlePointerMove);
+      canvas.removeEventListener("pointerup", handlePointerEnd);
+      canvas.removeEventListener("pointercancel", handlePointerEnd);
+      canvas.removeEventListener("pointerleave", handlePointerLeave);
+      canvas.style.touchAction = "";
+    };
+  }, [gl, snap]);
+
+  /* ---------- Frame ---------- */
+
+  useFrame((state, delta) => {
+    const dt = Math.min(delta, 0.05);
+    const reduced = reducedRef.current;
+
+    // Inércia: desacelera e, abaixo do limite, encaixa
+    if (phaseRef.current === "coast") {
+      const next = inertiaStep(targetAngleRef.current, velocityRef.current, dt, INERTIA_FRICTION);
+      targetAngleRef.current = next.angle;
+      velocityRef.current = next.velocity;
+      if (Math.abs(next.velocity) < SNAP_VELOCITY) snap(next.velocity);
+    }
+
+    // O ângulo desenhado persegue o alvo (mais colado durante o arraste)
+    const follow = phaseRef.current === "drag" ? 22 : 7;
+    angleRef.current = reduced
       ? targetAngleRef.current
-      : angleRef.current + (targetAngleRef.current - angleRef.current) * 0.08;
+      : angleRef.current + (targetAngleRef.current - angleRef.current) * (1 - Math.exp(-follow * dt));
+
+    // Parallax: inclina o conjunto seguindo o mouse
+    const tilt = tiltRef.current;
+    if (tilt) {
+      const pointer = pointerRef.current;
+      const on = pointer.fine && pointer.inside && !reduced;
+      const k = 1 - Math.pow(1 - PARALLAX_DAMPING, dt * 60);
+      tilt.rotation.y += ((on ? pointer.x * PARALLAX_MAX_RAD : 0) - tilt.rotation.y) * k;
+      tilt.rotation.x += ((on ? pointer.y * PARALLAX_MAX_RAD * 0.6 : 0) - tilt.rotation.x) * k;
+    }
+
+    const entrance = entranceRef.current;
+    const time = state.clock.elapsedTime;
 
     for (let i = 0; i < count; i++) {
       const device = deviceRefs.current[i];
@@ -137,77 +412,32 @@ export default function ProjectsCarousel({
       const x = Math.sin(itemAngle) * radius;
       const z = Math.cos(itemAngle) * radius;
       /** z vai de -raio (atrás) a +raio (frente) → escala de 0.6 a 1.1 */
-      const scale = 0.6 + ((z + radius) / (radius * 2)) * 0.5;
+      const depthScale = 0.6 + ((z + radius) / (radius * 2)) * 0.5;
+      const appear = entrance.devices[i];
+      const float = !reduced && i === activeRef.current ? Math.sin(time * FLOAT_SPEED) * FLOAT_AMPLITUDE : 0;
 
-      device.position.x = x;
-      device.position.z = z;
-      device.scale.setScalar(scale);
-
+      device.visible = appear > 0.001;
+      device.position.set(x, -(1 - appear) * ENTRANCE_RISE + float, z);
+      device.scale.setScalar(depthScale * (0.7 + 0.3 * appear));
       /** De frente para a câmera quando está na posição frontal */
       device.rotation.y = -itemAngle;
 
       /** A sombra acompanha no piso (o plano está deitado: girar em z = girar no piso) */
       const shadow = shadowRefs.current[i];
       if (shadow) {
+        shadow.visible = device.visible;
         shadow.position.set(x, FLOOR_Y, z);
-        shadow.scale.setScalar(scale);
+        shadow.scale.setScalar(depthScale * appear);
         shadow.rotation.z = -itemAngle;
       }
+
+      const hinge = hingeRefs.current[i];
+      if (hinge) hinge.rotation.x = LID_CLOSED + (LID_OPEN - LID_CLOSED) * entrance.lid;
     }
   });
 
-  /** Ao soltar o arraste, encaixa no projeto mais perto da frente */
-  const snapToNearest = useCallback(() => {
-    const nearest = Math.round(-targetAngleRef.current / anglePerItem);
-    const index = ((nearest % count) + count) % count;
-    rotateTo(index);
-    onSelect(index);
-  }, [anglePerItem, count, rotateTo, onSelect]);
-
-  const { gl } = useThree();
-
-  useEffect(() => {
-    if (!dragEnabled) return;
-
-    const canvas = gl.domElement;
-
-    const handlePointerDown = (e: PointerEvent) => {
-      isDragging.current = true;
-      dragStartX.current = e.clientX;
-      gsap.killTweensOf(targetAngleRef);
-      dragStartAngle.current = targetAngleRef.current;
-      canvas.setPointerCapture(e.pointerId);
-    };
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!isDragging.current) return;
-      const deltaX = e.clientX - dragStartX.current;
-      targetAngleRef.current = dragStartAngle.current + deltaX * DRAG_SENSITIVITY;
-    };
-
-    const handlePointerUp = () => {
-      if (!isDragging.current) return;
-      isDragging.current = false;
-      snapToNearest();
-    };
-
-    canvas.addEventListener("pointerdown", handlePointerDown);
-    canvas.addEventListener("pointermove", handlePointerMove);
-    canvas.addEventListener("pointerup", handlePointerUp);
-    canvas.addEventListener("pointercancel", handlePointerUp);
-    canvas.style.touchAction = "none";
-
-    return () => {
-      canvas.removeEventListener("pointerdown", handlePointerDown);
-      canvas.removeEventListener("pointermove", handlePointerMove);
-      canvas.removeEventListener("pointerup", handlePointerUp);
-      canvas.removeEventListener("pointercancel", handlePointerUp);
-      canvas.style.touchAction = "";
-    };
-  }, [gl, snapToNearest, dragEnabled]);
-
   return (
-    <group>
+    <group ref={tiltRef}>
       {projects.map((project, index) => (
         <group
           key={project.id}
@@ -217,14 +447,27 @@ export default function ProjectsCarousel({
           onClick={(e) => {
             e.stopPropagation();
             /** Fim de um arraste não é clique */
-            if (e.delta > CLICK_MAX_PX) return;
-            onSelect(index);
+            if (suppressClickRef.current || e.delta >= CLICK_MAX_PX) return;
+            if (index === activeRef.current) {
+              // Já é o ativo: só recentraliza se o giro parou no meio
+              rotateTo(index);
+              return;
+            }
+            selectFromScene(index, "click");
+            rotateTo(index);
           }}
         >
           {project.type === "mobile" ? (
             <DevicePhone screenTexture={project.screenshot} palette={palette} scale={phoneScale} />
           ) : (
-            <DeviceLaptop screenTexture={project.screenshot} palette={palette} scale={laptopScale} />
+            <DeviceLaptop
+              screenTexture={project.screenshot}
+              palette={palette}
+              scale={laptopScale}
+              hingeRef={(el) => {
+                hingeRefs.current[index] = el;
+              }}
+            />
           )}
         </group>
       ))}

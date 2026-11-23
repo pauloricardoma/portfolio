@@ -70,6 +70,39 @@ export const CAMERA_POSITION: [number, number, number] = [0, 1.1, 8.4];
 export const CAMERA_TARGET: [number, number, number] = [0, -0.35, 0];
 export const CAMERA_FOV = 42;
 
+/* ---------- Movimento (spec 0007 §2.3–2.8) ---------- */
+
+/** Arraste: radianos de giro por pixel */
+export const DRAG_SENSITIVITY = 0.008;
+/** O gesto só vira giro depois de andar isso na horizontal… */
+export const DRAG_START_PX = 10;
+/** …e se ficar até este ângulo da horizontal; senão é rolagem da página */
+export const DRAG_MAX_ANGLE = 30;
+/** Gesto que andou menos que isso é clique no aparelho */
+export const CLICK_MAX_PX = 6;
+/** Janela de amostras para medir a velocidade ao soltar (ms) */
+export const VELOCITY_WINDOW_MS = 100;
+/** Desaceleração da inércia (1/s): maior = para mais rápido */
+export const INERTIA_FRICTION = 4;
+/** Abaixo desta velocidade (rad/s) a inércia acaba e o carrossel encaixa */
+export const SNAP_VELOCITY = 0.9;
+/** Duração do encaixe final e da troca por botão/dot/teclado (s) */
+export const SNAP_DURATION = 0.55;
+export const SELECT_DURATION = 0.8;
+
+/** Inclinação máxima da cena seguindo o cursor (graus) e amortecimento */
+export const PARALLAX_MAX_DEG = 4;
+export const PARALLAX_DAMPING = 0.06;
+/** Flutuação do aparelho ativo: amplitude (unidades) e velocidade */
+export const FLOAT_AMPLITUDE = 0.04;
+export const FLOAT_SPEED = 1.2;
+
+/** Entrada ao rolar: duração total, atraso entre aparelhos e chave da sessão */
+export const ENTRANCE_DURATION = 1.2;
+export const ENTRANCE_STAGGER = 0.12;
+export const ENTRANCE_RISE = 1.4;
+export const ENTRANCE_SESSION_KEY = "prma:carousel-entrance";
+
 /* ---------- Desempenho (spec 0007 §2, casos de borda) ---------- */
 
 /** Abaixo disso por FPS_WINDOW_MS, a qualidade cai um nível */

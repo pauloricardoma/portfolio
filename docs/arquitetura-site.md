@@ -43,7 +43,7 @@ Tema: variáveis CSS por `[data-theme]`, definidas por um script no `<head>` ant
 
 Páginas seguem MVVM: a View (`Company.tsx`) só monta as seções; o ViewModel (`useCompany.ts`) resolve idioma, dados e itens do header. Ver [`adr/0002-estrutura-de-features.md`](adr/0002-estrutura-de-features.md).
 
-Carrossel do portfólio: a seção de projetos sai no SSR (palco, contador, setas, dots e detalhes). Só a cena Three.js (`ProjectsScene`) é `lazy()` e só monta se `useWebGLSupport` achar WebGL; um `WebGLBoundary` em volta troca para a screenshot se a cena quebrar. O projeto ativo mora no `usePortfolio` (`activeIndex`, loop módulo n); a cena recebe `activeIndex`, `onSelect` e cores em hex, e gira pelo caminho mais curto. Orçamento de bundle, pós-processamento e degradação por FPS: [`adr/0004-carrossel-threejs-orcamento-degradacao.md`](adr/0004-carrossel-threejs-orcamento-degradacao.md).
+Carrossel do portfólio: a seção de projetos sai no SSR (palco, contador, setas, dots e detalhes). Só a cena Three.js (`ProjectsScene`) é `lazy()` e só monta se `useWebGLSupport` achar WebGL; um `WebGLBoundary` em volta troca para a screenshot se a cena quebrar. O projeto ativo mora no `usePortfolio` (`activeIndex`, loop módulo n); a cena recebe `activeIndex`, `onSelect` e cores em hex, e gira pelo caminho mais curto. O movimento (arraste com inércia e encaixe, classificação do gesto, ângulo ↔ índice) é matemática pura em `src/components/3D/carouselMath.ts`, testada com Vitest (`yarn test`); o `ProjectsCarousel` só aplica por frame. A cena pausa o render fora da tela (`frameloop`), entra uma vez por sessão (`sessionStorage`, chave `prma:carousel-entrance`, sem dado pessoal) e avisa trocas com `onSelect(index, "drag" | "click")`. Orçamento de bundle, pós-processamento e degradação por FPS: [`adr/0004-carrossel-threejs-orcamento-degradacao.md`](adr/0004-carrossel-threejs-orcamento-degradacao.md).
 
 ## 3. Dados
 
@@ -59,7 +59,7 @@ Sem dados de usuário. Os pontos de atenção (headers, dependências, contas) e
 
 ## 6. Em aberto (técnico)
 
-1. Movimento do carrossel (inércia, toque, entrada, parallax, pausa fora da tela): plano 07.
+1. Gesto de toque do carrossel (swipe vertical rola, horizontal gira) conferido só no desktop; falta o aparelho real.
 2. Header no celular conferido em 390px (iframe) no plano 04; falta teste num aparelho real. Spec 0002.
 3. `yarn start` aponta para `build/server/index.js`, que o plugin da Netlify não gera. Spec 0003.
 4. Página da empresa carrega ~160 KB gzip de JS (React, styled-components, GSAP, router). Aceito por ora; reavaliar se as métricas do Search Console apontarem problema.

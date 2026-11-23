@@ -12,4 +12,4 @@ Status: `ideia` (só o título, no backlog) → `rascunho` → `aprovada` → `p
 | 0004 | Página de produto (`/products/<app>`) quando o app de jogos for lançado, com link para a landing própria | ideia (depois) | — |
 | 0005 | [Identidade visual: base da marca e home](0005-brand-identity-home.md) | concluída | 04 |
 | 0006 | [Identidade visual: redesign do /portfolio](0006-portfolio-redesign.md) (depende da 0005) | concluída | 05 |
-| 0007 | [Carrossel 3D mais detalhado e fluido](0007-3d-carousel-upgrade.md) (depende da 0006) | planejada | 06, 07 |
+| 0007 | [Carrossel 3D mais detalhado e fluido](0007-3d-carousel-upgrade.md) (depende da 0006) | concluída | 06, 07 |

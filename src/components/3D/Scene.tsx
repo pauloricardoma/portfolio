@@ -10,7 +10,7 @@
  *
  * Fundo transparente (alpha): o palco em CSS aparece por trás.
  */
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
 import { PerformanceMonitor } from "@react-three/drei";
 import type { ThemeMode } from "~/styles/tokens";
@@ -27,9 +27,39 @@ interface SceneProps {
   quality: SceneQuality;
 }
 
+/**
+ * Render só com o palco na tela e a aba visível. Fora disso o loop para
+ * (frameloop "never"): zero GPU com o visitante lendo o resto da página.
+ */
+function useRenderWhileVisible() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const [onScreen, setOnScreen] = useState(true);
+  const [tabVisible, setTabVisible] = useState(true);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const observer = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting));
+    observer.observe(canvas);
+
+    const onVisibility = () => setTabVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
+  return { ref, running: onScreen && tabVisible };
+}
+
 export default function Scene({ children, className, themeMode, quality }: SceneProps) {
+  const { ref, running } = useRenderWhileVisible();
+
   return (
     <Canvas
+      ref={ref}
+      frameloop={running ? "always" : "never"}
       className={className}
       camera={{ position: CAMERA_POSITION, fov: CAMERA_FOV }}
       onCreated={({ camera }) => camera.lookAt(...CAMERA_TARGET)}
@@ -38,7 +68,8 @@ export default function Scene({ children, className, themeMode, quality }: Scene
       gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       style={{ background: "transparent" }}
     >
-      {quality.monitoring && (
+      {/* Pausado, sem medir: a volta não pode contar como queda de FPS */}
+      {quality.monitoring && running && (
         <PerformanceMonitor
           ms={FPS_SAMPLE_MS}
           iterations={FPS_SAMPLES}
