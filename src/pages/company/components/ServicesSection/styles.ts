@@ -1,28 +1,38 @@
 import styled from "styled-components";
-import { spacing, borderRadius } from "~/styles/tokens";
 
-export const ServicesText = styled.p`
-  font-size: 18px;
-  line-height: 1.6;
-  color: ${({ theme }) => theme.colors.surface.onSurfaceVariant};
-  max-width: 640px;
-  margin: ${spacing.md}px auto 0;
+export const ServicesLead = styled.p`
+  max-width: 620px;
+  font: 400 20px/1.5 ${({ theme }) => theme.font.sans};
+  text-wrap: pretty;
 `;
 
-export const ServicesCta = styled.a`
-  display: inline-block;
-  margin-top: ${spacing.xl}px;
-  padding: ${spacing.sm + 2}px ${spacing.lg}px;
-  border-radius: ${borderRadius.md}px;
-  border: 1px solid ${({ theme }) => theme.colors.primary.primaryOutline};
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: none;
-  color: ${({ theme }) => theme.colors.primary.primary};
-  transition: all 0.2s ease;
+/** Faixa de passos: grid com gap de 2px sobre fundo "line" = divisórias finas */
+export const Steps = styled.ol`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 2px;
+  list-style: none;
+  background: ${({ theme }) => theme.colors.line};
+  border: 1px solid ${({ theme }) => theme.colors.line};
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 10px 0;
+`;
 
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primary.primaryContainer};
-    transform: translateY(-2px);
-  }
+export const Step = styled.li`
+  background: ${({ theme }) => theme.colors.card};
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+`;
+
+export const StepNumber = styled.span`
+  font: 500 12px ${({ theme }) => theme.font.mono};
+  color: ${({ theme }) => theme.colors.muted};
+`;
+
+export const StepTitle = styled.span`
+  font: 600 18px ${({ theme }) => theme.font.sans};
+  letter-spacing: -0.02em;
 `;

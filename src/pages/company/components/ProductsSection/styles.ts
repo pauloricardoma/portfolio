@@ -1,78 +1,70 @@
 import styled from "styled-components";
-import { spacing, borderRadius } from "~/styles/tokens";
+import { borderRadius, type } from "~/styles/tokens";
 
-export const SectionIntro = styled.p`
-  font-size: 18px;
-  line-height: 1.6;
-  text-align: center;
-  color: ${({ theme }) => theme.colors.surface.onSurfaceVariant};
-  margin-top: ${spacing.md}px;
-`;
-
-export const ProductsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 520px));
-  justify-content: center;
-  gap: ${spacing.lg}px;
-  margin-top: ${spacing.xl}px;
+export const ProductsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 `;
 
 export const Card = styled.article`
-  background-color: ${({ theme }) => theme.colors.surface.surfaceContainer};
-  border: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
-  border-radius: ${borderRadius.lg}px;
-  padding: ${spacing.lg}px;
-  transition: all 0.3s ease;
+  background: ${({ theme }) => theme.colors.card};
+  border: 1px solid ${({ theme }) => theme.colors.line};
+  border-radius: ${borderRadius.card}px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.primary.primaryOutline};
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  @media (max-width: 480px) {
+    padding: 24px;
   }
 `;
 
 export const CardHeader = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: ${spacing.sm}px;
-  padding-bottom: ${spacing.sm}px;
-  border-bottom: 2px solid ${({ theme }) => theme.colors.primary.primaryContainer};
 `;
 
-export const StatusBadge = styled.span`
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: ${spacing.xs}px ${spacing.sm + 2}px;
-  border-radius: ${borderRadius.full}px;
-  border: 1px solid ${({ theme }) => theme.colors.primary.primaryOutline};
-  color: ${({ theme }) => theme.colors.primary.primary};
+export const ProductName = styled.h3`
+  font: 600 26px ${({ theme }) => theme.font.sans};
+  letter-spacing: -0.025em;
 `;
 
-export const PlatformList = styled.div`
+export const StatusPill = styled.span`
   display: flex;
-  flex-wrap: wrap;
-  gap: ${spacing.sm}px;
-  margin-top: ${spacing.md}px;
+  align-items: center;
+  gap: 8px;
+  font: 500 12px ${({ theme }) => theme.font.mono};
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid ${({ theme }) => theme.colors.line};
+  border-radius: ${borderRadius.full}px;
+  padding: 6px 12px;
 `;
 
-export const PlatformTag = styled.span`
-  font-size: 12px;
-  padding: ${spacing.xs}px ${spacing.sm}px;
-  background-color: ${({ theme }) => theme.colors.primary.primaryContainer};
-  color: ${({ theme }) => theme.colors.primary.primary};
-  border-radius: ${borderRadius.full}px;
-  font-weight: 500;
+export const Description = styled.p`
+  max-width: 560px;
+  font: ${type.body} ${({ theme }) => theme.font.sans};
+  color: ${({ theme }) => theme.colors.muted};
+  text-wrap: pretty;
+`;
+
+export const Platforms = styled.ul`
+  display: flex;
+  gap: 16px;
+  list-style: none;
+  padding-top: 18px;
+  border-top: 1px solid ${({ theme }) => theme.colors.line};
+  font: 500 13px ${({ theme }) => theme.font.mono};
+  color: ${({ theme }) => theme.colors.muted};
 `;
 
 export const ProductLink = styled.a`
-  display: inline-block;
-  margin-top: ${spacing.md}px;
-  font-size: 14px;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.primary.primary};
-  text-decoration: none;
+  align-self: flex-start;
+  font: 600 15px ${({ theme }) => theme.font.sans};
+  border-bottom: 2px solid ${({ theme }) => theme.colors.accent};
 `;

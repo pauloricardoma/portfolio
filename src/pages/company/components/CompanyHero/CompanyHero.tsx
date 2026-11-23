@@ -1,107 +1,46 @@
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Text from "~/components/UI/Text/Text";
-import Section from "~/components/UI/Section/Section";
-import Container from "~/components/UI/Container/Container";
+import Cursor from "~/components/Brand/Cursor/Cursor";
+import Button from "~/components/UI/Button/Button";
 import type { IDictionary } from "~/i18n/types";
-import {
-  HeroWrapper,
-  HeroContent,
-  Kicker,
-  HeroSubtitle,
-  AccentLine,
-  ScrollIndicator,
-  ScrollText,
-  ScrollArrow,
-} from "./styles";
-
-gsap.registerPlugin(ScrollTrigger);
+import { HeroWrapper, Eyebrow, EyebrowSquare, Title, TitleEnd, Lead, Actions } from "./styles";
 
 interface CompanyHeroProps {
   texts: IDictionary["company"]["hero"];
+  email: string;
 }
 
-export default function CompanyHero({ texts }: CompanyHeroProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      const tl = gsap.timeline({
-        defaults: { duration: 0.8, ease: "power3.out" },
-      });
-
-      tl.fromTo(".hero-kicker", { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1 })
-        .fromTo(
-          ".hero-title",
-          { y: 20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1 },
-          "<0.2"
-        )
-        .fromTo(
-          ".hero-accent",
-          { scaleX: 0, autoAlpha: 0 },
-          { scaleX: 1, autoAlpha: 1, duration: 0.6 },
-          "<0.3"
-        )
-        .fromTo(
-          ".hero-subtitle",
-          { y: 20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1 },
-          "<0.2"
-        )
-        .fromTo(
-          ".hero-scroll",
-          { autoAlpha: 0 },
-          { autoAlpha: 1, duration: 0.6 },
-          "<0.4"
-        );
-
-      gsap.to(".hero-content", {
-        y: -100,
-        autoAlpha: 0,
-        ease: "none",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-        },
-      });
-    },
-    { scope: containerRef }
-  );
+/**
+ * Entrada em CSS (sem GSAP): o texto do hero aparece mesmo antes do JS,
+ * o que ajuda o LCP (spec 0001).
+ */
+export default function CompanyHero({ texts, email }: CompanyHeroProps) {
+  const scrollToProducts = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
-    <Section fullHeight id="hero">
-      <HeroWrapper ref={containerRef}>
-        <Container>
-          <HeroContent className="hero-content">
-            <Kicker className="hero-kicker">{texts.kicker}</Kicker>
+    <HeroWrapper id="hero">
+      <Eyebrow>
+        <EyebrowSquare aria-hidden="true" />
+        {texts.kicker}
+      </Eyebrow>
 
-            <Text variant="hero" className="hero-title">
-              PRMA Code
-            </Text>
+      <Title>
+        <span>PRMA</span>
+        <TitleEnd>
+          <span>Code</span>
+          <Cursor width="0.32em" height="0.09em" offset="0.1em" />
+        </TitleEnd>
+      </Title>
 
-            <AccentLine className="hero-accent" />
+      <Lead>{texts.subtitle}</Lead>
 
-            <HeroSubtitle className="hero-subtitle">{texts.subtitle}</HeroSubtitle>
-          </HeroContent>
-        </Container>
-
-        <ScrollIndicator
-          className="hero-scroll"
-          onClick={() =>
-            document
-              .getElementById("products")
-              ?.scrollIntoView({ behavior: "smooth" })
-          }
-        >
-          <ScrollText>{texts.scroll}</ScrollText>
-          <ScrollArrow />
-        </ScrollIndicator>
-      </HeroWrapper>
-    </Section>
+      <Actions>
+        <Button href={`mailto:${email}`}>{texts.ctaPrimary}</Button>
+        <Button href="#products" variant="outline" onClick={scrollToProducts}>
+          {texts.ctaSecondary}
+        </Button>
+      </Actions>
+    </HeroWrapper>
   );
 }

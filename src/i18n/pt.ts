@@ -20,39 +20,46 @@ const pt: IDictionary = {
     skills: "Skills",
     menu: "Menu",
     language: "Idioma",
-    switchTheme: (toDark) => `Mudar para tema ${toDark ? "escuro" : "claro"}`,
+    toggleTheme: "Mudar tema",
+    themeLight: "Claro",
+    themeDark: "Escuro",
   },
   company: {
     hero: {
       kicker: "Estúdio de software",
       subtitle:
         "A PRMA Code é um estúdio de software. Criamos nossos próprios produtos digitais e desenvolvemos apps mobile e web para clientes.",
-      scroll: "Scroll",
+      ctaPrimary: "Falar sobre um projeto →",
+      ctaSecondary: "Veja o que estamos construindo",
     },
     products: {
-      title: "Produtos",
-      intro: "O que estamos construindo.",
+      label: "Produtos",
+      title: "O que estamos construindo.",
       status: {
         "coming-soon": "Em breve",
         live: "Disponível",
       },
     },
     services: {
+      label: "Serviços",
       title: "Projetos para clientes",
       text: "Além dos produtos próprios, desenvolvemos apps mobile e web para clientes, de ponta a ponta: do planejamento e design à publicação na App Store e no Google Play.",
-      cta: "Falar sobre um projeto",
+      steps: ["Planejamento", "Design", "Desenvolvimento", "App Store e Google Play"],
+      cta: "Falar sobre um projeto →",
     },
     founder: {
-      title: "Quem faz",
       label: "Fundador",
+      title: "Quem faz",
       text: "A PRMA Code foi fundada por Paulo Ricardo Almeida, engenheiro de software que desenvolve aplicações web e mobile com React, React Native, TypeScript e Node.js.",
       cta: "Ver portfólio →",
     },
     contact: {
-      title: "Contato",
+      label: "Contato",
+      title: "Fale com a gente",
       subtitle: "Tem um projeto em mente ou dúvidas sobre nossos produtos? Escreva para:",
     },
     footer: {
+      copyright: (year) => `© ${year} PRMA Code`,
       cnpjLabel: "CNPJ",
     },
   },

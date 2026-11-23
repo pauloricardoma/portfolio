@@ -18,6 +18,14 @@ export const PRODUCTS: IProduct[] = [
       en: "An app for finding people to play with. It matches players into duos and parties based on how they play: server, rank, role, schedule and playstyle.",
       pt: "Um app para encontrar pessoas para jogar. Ele forma duplas e parties por compatibilidade de jogo: servidor, elo, função, horário e estilo.",
     },
+    // Critérios de compatibilidade, os mesmos da descrição
+    tags: [
+      { en: "Server", pt: "Servidor" },
+      { en: "Rank", pt: "Elo" },
+      { en: "Role", pt: "Função" },
+      { en: "Schedule", pt: "Horário" },
+      { en: "Playstyle", pt: "Estilo" },
+    ],
     platforms: ["iOS", "Android"],
     status: "coming-soon",
   },

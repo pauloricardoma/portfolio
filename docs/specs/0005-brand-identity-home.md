@@ -1,6 +1,6 @@
 # Spec 0005 — Identidade visual: base da marca e home
 
-- **Status:** planejada
+- **Status:** concluída
 - **Pedido original:** "Beleza, começa no docs/design_handoff_prma_code_brand_site/README.md" (spec 0005 do backlog: refatoração da identidade visual)
 - **Data:** 23/11/2026
 - **Planos:** 04

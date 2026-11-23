@@ -1,42 +1,37 @@
-import { Link } from "react-router";
-import Section from "~/components/UI/Section/Section";
-import Container from "~/components/UI/Container/Container";
-import Text from "~/components/UI/Text/Text";
-import { useReveal } from "~/hooks/useReveal";
+import SplitSection from "~/components/UI/SplitSection/SplitSection";
+import UnderlineLink from "~/components/UI/UnderlineLink/UnderlineLink";
+import Chip from "~/components/UI/Chip/Chip";
+import { ChipList } from "~/components/UI/Chip/styles";
 import type { IDictionary } from "~/i18n/types";
-import { FounderCard, FounderLabel, FounderText, FounderCta } from "./styles";
+import { FounderName, FounderText } from "./styles";
 
 interface FounderSectionProps {
+  index: string;
   texts: IDictionary["company"]["founder"];
   founderName: string;
+  stack: readonly string[];
   portfolioPath: string;
 }
 
 export default function FounderSection({
+  index,
   texts,
   founderName,
+  stack,
   portfolioPath,
 }: FounderSectionProps) {
-  const ref = useReveal();
-
   return (
-    <Section id="founder">
-      <div ref={ref}>
-        <Container>
-          <Text variant="h1" align="center" className="reveal">
-            {texts.title}
-          </Text>
-
-          <FounderCard className="reveal">
-            <FounderLabel>{texts.label}</FounderLabel>
-            <Text variant="h2">{founderName}</Text>
-            <FounderText>{texts.text}</FounderText>
-            <FounderCta as={Link} to={portfolioPath}>
-              {texts.cta}
-            </FounderCta>
-          </FounderCard>
-        </Container>
-      </div>
-    </Section>
+    <SplitSection id="founder" index={index} label={texts.label} title={texts.title}>
+      <FounderName>{founderName}</FounderName>
+      <FounderText>{texts.text}</FounderText>
+      <ChipList>
+        {stack.map((item) => (
+          <Chip key={item}>{item}</Chip>
+        ))}
+      </ChipList>
+      <UnderlineLink href={portfolioPath} route>
+        {texts.cta}
+      </UnderlineLink>
+    </SplitSection>
   );
 }

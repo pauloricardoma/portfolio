@@ -20,15 +20,15 @@ src/
 ├── routes.ts                 rotas manuais: / e /portfolio (en), /pt e /pt/portfolio (pt)
 ├── routes/                   entradas de rota: meta() + exportam a page
 ├── pages/<page>/             MVVM: Company.tsx / useCompany.ts, Portfolio.tsx / usePortfolio.ts, components/
-├── components/{UI,3D,Shell}  reutilizáveis (Text, Button, Section…), 3D, Header + LanguageToggle
+├── components/{UI,Brand,3D,Shell}  UI (Button, Chip, SplitSection…), marca (LogoMark, Cursor), 3D, Header/Footer
 ├── i18n/                     en.ts / pt.ts tipados por IDictionary, locale.ts (helpers de rota)
 ├── config/                   company.ts (e-mail, CNPJ), products.ts (lista de produtos)
 ├── seo/buildMeta.ts          title, description, canonical, hreflang, OG, Twitter, JSON-LD
 ├── hooks/                    useLocale, useReveal, useIsMobile
 ├── interfaces/               interfaces TS por feature
-├── styles/                   themes/ (light/dark, ITheme), tokens.ts, global.ts
-└── contexts/                 ThemeContext
-public/                       og-image.png, robots.txt, sitemap.xml, fonts/, projects/
+├── styles/                   tokens.ts (hex), themes/theme.ts (var(--…)), global.ts, themeScript.ts
+└── contexts/                 ThemeContext (data-theme no <html>)
+public/                       og-image.png, favicon.{svg,ico}, apple-touch-icon.png, robots.txt, sitemap.xml, fonts/ (Geist), projects/
 ```
 
 ## Comandos
@@ -56,7 +56,8 @@ yarn typecheck   # typegen + tsc
 
 - Código (identificadores, arquivos, commits) em inglês, exceto mensagens de commit, que seguem o histórico: Conventional Commits em português. Docs e specs em português.
 - Um componente por arquivo: `ComponentName.tsx` + `styles.ts` na mesma pasta.
-- styled-components (não Tailwind), transient props com `$`. Tokens em `src/styles/tokens.ts`, variantes com `color-mix()`.
+- styled-components (não Tailwind), transient props com `$`. Cores sempre via `theme.colors.*` (são `var(--…)`); hex de `src/styles/tokens.ts` só para Three.js/GSAP. Variantes com `color-mix()`. Identidade no handoff `docs/design_handoff_prma_code_brand_site/`.
+- Laranja `#E8743B` nunca em texto pequeno sobre fundo claro (contraste); no tema claro, hover de link é sublinhado laranja com texto em ink.
 - Animações com GSAP + ScrollTrigger (`useGSAP`). Elemento animado nasce com `visibility: hidden` e é revelado com `fromTo` + `autoAlpha` (nunca `from` com opacity). Para entrada ao rolar, use `useReveal` + classe `.reveal`.
 - Three.js só no portfólio, carregado via `lazy()`.
 
@@ -64,5 +65,7 @@ yarn typecheck   # typegen + tsc
 
 - `styled-components` e `gsap` precisam estar em `ssr.noExternal` no `vite.config.ts`, senão o SSR quebra.
 - O mesmo módulo de rota é usado nos dois idiomas com `id` diferente em `routes.ts`; o idioma vem da URL (`getLocaleFromPath`).
-- Depois de criar componentes novos com o dev rodando, o HMR pode acusar hydration mismatch de classes do styled-components. Reinicie o `yarn dev` antes de investigar.
+- Ids das classes do styled-components vêm do `babel-plugin-styled-components` (`vite.config.ts`, só `src/`). Sem ele, o `/portfolio` diverge na hidratação, porque o servidor carrega todas as rotas e o cliente só uma (ADR 0003).
+- Nada que dependa do tema no render do React (SSR não sabe o tema): use CSS (`[data-theme]`, classes `only-light`/`only-dark`). Mudou o `themeScript.ts`? Recalcule o hash da CSP (spec 0003).
+- Depois de criar componentes novos com o dev rodando, o HMR pode acusar hydration mismatch. Reinicie o `yarn dev` antes de investigar.
 - `.claude/` está no `.gitignore`: planos e settings não vão para o repositório.

@@ -1,36 +1,23 @@
-import Section from "~/components/UI/Section/Section";
-import Container from "~/components/UI/Container/Container";
-import Text from "~/components/UI/Text/Text";
-import { useReveal } from "~/hooks/useReveal";
+import SplitSection from "~/components/UI/SplitSection/SplitSection";
 import type { IDictionary } from "~/i18n/types";
 import type { IProductCard } from "~/interfaces/company/IProduct";
 import ProductCard from "./ProductCard";
-import { SectionIntro, ProductsGrid } from "./styles";
+import { ProductsList } from "./styles";
 
 interface ProductsSectionProps {
+  index: string;
   texts: IDictionary["company"]["products"];
   products: IProductCard[];
 }
 
-export default function ProductsSection({ texts, products }: ProductsSectionProps) {
-  const ref = useReveal();
-
+export default function ProductsSection({ index, texts, products }: ProductsSectionProps) {
   return (
-    <Section id="products">
-      <div ref={ref}>
-        <Container>
-          <Text variant="h1" align="center" className="reveal">
-            {texts.title}
-          </Text>
-          <SectionIntro className="reveal">{texts.intro}</SectionIntro>
-
-          <ProductsGrid>
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} className="reveal" />
-            ))}
-          </ProductsGrid>
-        </Container>
-      </div>
-    </Section>
+    <SplitSection id="products" index={index} label={texts.label} title={texts.title}>
+      <ProductsList>
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </ProductsList>
+    </SplitSection>
   );
 }

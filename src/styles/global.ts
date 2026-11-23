@@ -1,48 +1,54 @@
 import { createGlobalStyle } from "styled-components";
+import { themeVars } from "~/styles/themes/theme";
+
+const fontFace = (family: string, file: string, weight: number) => `
+  @font-face {
+    font-family: '${family}';
+    font-style: normal;
+    font-weight: ${weight};
+    font-display: swap;
+    src: url('/fonts/${file}.woff2') format('woff2');
+  }
+`;
 
 export const GlobalStyle = createGlobalStyle`
-  @font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 400;
-    font-display: optional;
-    src: url('/fonts/inter-400.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-      U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
-      U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  ${fontFace("Geist", "geist-400", 400)}
+  ${fontFace("Geist", "geist-500", 500)}
+  ${fontFace("Geist", "geist-600", 600)}
+  ${fontFace("Geist Mono", "geist-mono-500", 500)}
+  ${fontFace("Geist Mono", "geist-mono-600", 600)}
+
+  /*
+   * Tema: o script do <head> (styles/themeScript.ts) define data-theme antes
+   * da pintura. Sem JS, vale a preferência do sistema.
+   */
+  :root {
+    ${themeVars("light")}
   }
 
-  @font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 500;
-    font-display: optional;
-    src: url('/fonts/inter-500.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-      U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
-      U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      ${themeVars("dark")}
+    }
   }
 
-  @font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 600;
-    font-display: optional;
-    src: url('/fonts/inter-600.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-      U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
-      U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  :root[data-theme="dark"] {
+    ${themeVars("dark")}
   }
 
-  @font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 700;
-    font-display: optional;
-    src: url('/fonts/inter-700.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-      U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
-      U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  /* Partes da UI que mudam com o tema sem passar pelo estado do React */
+  :root[data-theme="dark"] .only-light,
+  :root:not([data-theme="dark"]) .only-dark {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .only-light {
+      display: none;
+    }
+    :root:not([data-theme]) .only-dark {
+      display: inline;
+    }
   }
 
   *, *::before, *::after {
@@ -57,13 +63,12 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    background-color: ${({ theme }) => theme.colors.surface.surface};
-    color: ${({ theme }) => theme.colors.surface.onSurface};
+    font-family: ${({ theme }) => theme.font.sans};
+    background-color: ${({ theme }) => theme.colors.bg};
+    color: ${({ theme }) => theme.colors.ink};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Transição suave ao trocar de tema (light ↔ dark) */
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   a {
@@ -75,22 +80,34 @@ export const GlobalStyle = createGlobalStyle`
     contain: layout;
   }
 
+  ::selection {
+    background: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.onAccent};
+  }
+
+  :focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
+
   * {
     scrollbar-width: thin;
-    scrollbar-color: ${({ theme }) => theme.colors.surface.onSurfaceVariant} transparent;
+    scrollbar-color: ${({ theme }) => theme.colors.muted} transparent;
+  }
 
-    &::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
+  @keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
     }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background-color: ${({ theme }) => theme.colors.surface.onSurfaceVariant};
-      border-radius: 4px;
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
   }
 

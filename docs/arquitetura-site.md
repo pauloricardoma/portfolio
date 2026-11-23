@@ -24,23 +24,26 @@ src/
 │   └── portfolio/            Portfolio.tsx, usePortfolio.ts, components/{HeroSection, ProjectsSection,
 │                             SkillsSection, ContactSection}
 ├── components/
-│   ├── UI/                   Text, Button, Container, Section, ColorPicker
+│   ├── UI/                   Text, Button, Chip, UnderlineLink, SplitSection, Container, Section
+│   ├── Brand/                LogoMark (marca "P com cursor"), Cursor (cursor piscando)
 │   ├── 3D/                   Scene, DevicePhone, DeviceLaptop, LaptopKeyboard
-│   └── Shell/                Header (recebe navItems da page), LanguageToggle
+│   └── Shell/                Header (recebe navItems da page), LanguageToggle, Footer
 ├── i18n/                     types.ts (IDictionary, Locale, Localized), en.ts, pt.ts, locale.ts
 ├── config/                   company.ts, products.ts
 ├── seo/buildMeta.ts          metas, OG, hreflang, JSON-LD (Organization, Person)
 ├── hooks/                    useLocale, useReveal, useIsMobile
 ├── interfaces/               company/, portfolio/, shell/
-├── styles/                   themes/, tokens.ts, global.ts
-└── contexts/ThemeContext.tsx tema light/dark + cor primária (localStorage)
+├── styles/                   tokens.ts (hex), themes/theme.ts (var(--…)), global.ts, themeScript.ts
+└── contexts/ThemeContext.tsx tema light/dark (data-theme no <html> + localStorage)
 ```
+
+Tema: variáveis CSS por `[data-theme]`, definidas por um script no `<head>` antes da pintura; ids do styled-components estáveis via `babel-plugin-styled-components`. Ver [`adr/0003-tema-por-variaveis-css.md`](adr/0003-tema-por-variaveis-css.md).
 
 Páginas seguem MVVM: a View (`Company.tsx`) só monta as seções; o ViewModel (`useCompany.ts`) resolve idioma, dados e itens do header. Ver [`adr/0002-estrutura-de-features.md`](adr/0002-estrutura-de-features.md).
 
 ## 3. Dados
 
-Sem banco. Textos em `src/i18n/{en,pt}.ts`; dados da empresa e produtos em `src/config/`; projetos e skills do portfólio em `usePortfolio.ts`. Preferências do visitante (tema e cor) só no `localStorage`.
+Sem banco. Textos em `src/i18n/{en,pt}.ts`; dados da empresa e produtos em `src/config/`; projetos e skills do portfólio em `usePortfolio.ts`. Preferência do visitante (tema) só no `localStorage`.
 
 ## 4. Integrações
 
@@ -52,7 +55,7 @@ Sem dados de usuário. Os pontos de atenção (headers, dependências, contas) e
 
 ## 6. Em aberto (técnico)
 
-1. Hero depende do GSAP para aparecer (`visibility: hidden` até o JS rodar), o que atrasa o LCP. Spec 0001.
-2. Header no celular com LanguageToggle + ColorPicker + tema + menu não foi testado em tela pequena. Spec 0002.
+1. O hero do portfólio ainda depende do GSAP para aparecer (`visibility: hidden` até o JS rodar), o que atrasa o LCP. O da home já entra em CSS. Spec 0001 (e plano 05).
+2. Header no celular conferido em 390px (iframe) no plano 04; falta teste num aparelho real. Spec 0002.
 3. `yarn start` aponta para `build/server/index.js`, que o plugin da Netlify não gera. Spec 0003.
 4. Página da empresa carrega ~160 KB gzip de JS (React, styled-components, GSAP, router). Aceito por ora; reavaliar se as métricas do Search Console apontarem problema.

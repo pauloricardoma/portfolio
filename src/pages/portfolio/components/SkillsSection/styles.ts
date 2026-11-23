@@ -39,14 +39,14 @@ export const CategoriesGrid = styled.div`
 `;
 
 export const CategoryCard = styled.div`
-  background-color: ${({ theme }) => theme.colors.surface.surfaceContainer};
-  border: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
-  border-radius: ${borderRadius.lg}px;
+  background-color: ${({ theme }) => theme.colors.card};
+  border: 1px solid ${({ theme }) => theme.colors.line};
+  border-radius: ${borderRadius.card}px;
   padding: ${spacing.lg}px;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: ${({ theme }) => theme.colors.primary.primaryOutline};
+    border-color: ${({ theme }) => theme.colors.accent};
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
@@ -58,7 +58,7 @@ export const CategoryTitle = styled.div`
   gap: ${spacing.sm}px;
   margin-bottom: ${spacing.md}px;
   padding-bottom: ${spacing.sm}px;
-  border-bottom: 2px solid ${({ theme }) => theme.colors.primary.primaryContainer};
+  border-bottom: 2px solid ${({ theme }) => theme.colors.accentSoft};
 `;
 
 export const CategoryIcon = styled.span`
@@ -78,18 +78,18 @@ export const SkillTag = styled.div`
   align-items: center;
   gap: 6px;
   padding: ${spacing.xs + 2}px ${spacing.md}px;
-  background-color: ${({ theme }) => theme.colors.surface.surface};
-  border: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
+  background-color: ${({ theme }) => theme.colors.bg};
+  border: 1px solid ${({ theme }) => theme.colors.line};
   border-radius: ${borderRadius.md}px;
   font-size: 13px;
   font-weight: 500;
-  color: ${({ theme }) => theme.colors.surface.onSurface};
+  color: ${({ theme }) => theme.colors.ink};
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.primary.primaryContainer};
-    border-color: ${({ theme }) => theme.colors.primary.primaryOutline};
-    color: ${({ theme }) => theme.colors.primary.primary};
+    background-color: ${({ theme }) => theme.colors.accentSoft};
+    border-color: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.accent};
   }
 `;
 
@@ -100,7 +100,7 @@ export const SkillTag = styled.div`
 export const ProficiencyBar = styled.div`
   width: 100%;
   height: 3px;
-  background-color: ${({ theme }) => theme.colors.surface.surfaceOutline};
+  background-color: ${({ theme }) => theme.colors.line};
   border-radius: 2px;
   margin-top: ${spacing.md}px;
   overflow: hidden;
@@ -115,8 +115,8 @@ export const ProficiencyFill = styled.div<ProficiencyFillProps>`
   width: 0%;
   background: linear-gradient(
     90deg,
-    ${({ theme }) => theme.colors.primary.primary},
-    ${({ theme }) => theme.colors.primary.primaryHover}
+    ${({ theme }) => theme.colors.accent},
+    ${({ theme }) => theme.colors.accent}
   );
   border-radius: 2px;
   transition: width 0.3s ease;

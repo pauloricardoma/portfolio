@@ -37,9 +37,9 @@ export const CanvasContainer = styled.div`
 
 /** Card de descrição do projeto em foco */
 export const DescriptionCard = styled.div`
-  background-color: ${({ theme }) => theme.colors.surface.surfaceContainer};
-  border: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
-  border-radius: ${borderRadius.lg}px;
+  background-color: ${({ theme }) => theme.colors.card};
+  border: 1px solid ${({ theme }) => theme.colors.line};
+  border-radius: ${borderRadius.card}px;
   padding: ${spacing.lg}px;
   max-width: 500px;
   margin: 0 auto;
@@ -58,8 +58,8 @@ export const TechList = styled.div`
 export const TechTag = styled.span`
   font-size: 12px;
   padding: ${spacing.xs}px ${spacing.sm}px;
-  background-color: ${({ theme }) => theme.colors.primary.primaryContainer};
-  color: ${({ theme }) => theme.colors.primary.primary};
+  background-color: ${({ theme }) => theme.colors.accentSoft};
+  color: ${({ theme }) => theme.colors.accent};
   border-radius: ${borderRadius.full}px;
   font-weight: 500;
 `;
@@ -84,11 +84,11 @@ export const Dot = styled.button<DotProps>`
   cursor: pointer;
   transition: all 0.3s ease;
   background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary.primary : theme.colors.surface.surfaceOutline};
+    $active ? theme.colors.accent : theme.colors.line};
   transform: ${({ $active }) => ($active ? "scale(1.3)" : "scale(1)")};
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.primary.primary};
+    background-color: ${({ theme }) => theme.colors.accent};
   }
 `;
 
@@ -104,9 +104,9 @@ export const NavArrow = styled.button`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
-  background-color: ${({ theme }) => theme.colors.surface.surfaceContainer};
-  color: ${({ theme }) => theme.colors.surface.onSurface};
+  border: 1px solid ${({ theme }) => theme.colors.line};
+  background-color: ${({ theme }) => theme.colors.card};
+  color: ${({ theme }) => theme.colors.ink};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -115,9 +115,9 @@ export const NavArrow = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.primary.primaryContainer};
-    border-color: ${({ theme }) => theme.colors.primary.primary};
-    color: ${({ theme }) => theme.colors.primary.primary};
+    background-color: ${({ theme }) => theme.colors.accentSoft};
+    border-color: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.accent};
   }
 `;
 

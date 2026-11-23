@@ -30,7 +30,7 @@ export default function Text({
     fontSize: styles.size,
     fontWeight: weight ? fontWeightTokens[weight] : styles.weight,
     lineHeight: styles.lh,
-    color: color || theme.colors.surface.onSurface,
+    color: color || theme.colors.ink,
     textAlign: align || undefined,
     margin: 0,
     ...externalStyle,

@@ -24,13 +24,16 @@
     "three": "^0.183.2"
   },
   "devDependencies": {
+    "@babel/core": "^7",
     "@react-router/dev": "7.13.2",
     "@types/node": "^22",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/styled-components": "^5.1.36",
+    "babel-plugin-styled-components": "^2.4.0",
     "typescript": "^5.9.3",
     "vite": "^7.1.7",
+    "vite-plugin-babel": "^1.7.3",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "engines": {

@@ -1,31 +1,29 @@
-import Section from "~/components/UI/Section/Section";
-import Container from "~/components/UI/Container/Container";
-import Text from "~/components/UI/Text/Text";
-import { useReveal } from "~/hooks/useReveal";
+import SplitSection from "~/components/UI/SplitSection/SplitSection";
+import UnderlineLink from "~/components/UI/UnderlineLink/UnderlineLink";
 import type { IDictionary } from "~/i18n/types";
-import { ServicesText, ServicesCta } from "./styles";
+import { ServicesLead, Steps, Step, StepNumber, StepTitle } from "./styles";
 
 interface ServicesSectionProps {
+  index: string;
   texts: IDictionary["company"]["services"];
   email: string;
 }
 
-export default function ServicesSection({ texts, email }: ServicesSectionProps) {
-  const ref = useReveal();
-
+export default function ServicesSection({ index, texts, email }: ServicesSectionProps) {
   return (
-    <Section id="services">
-      <div ref={ref} style={{ textAlign: "center" }}>
-        <Container>
-          <Text variant="h1" align="center" className="reveal">
-            {texts.title}
-          </Text>
-          <ServicesText className="reveal">{texts.text}</ServicesText>
-          <ServicesCta href={`mailto:${email}`} className="reveal">
-            {texts.cta} →
-          </ServicesCta>
-        </Container>
-      </div>
-    </Section>
+    <SplitSection id="services" index={index} label={texts.label} title={texts.title}>
+      <ServicesLead>{texts.text}</ServicesLead>
+
+      <Steps>
+        {texts.steps.map((step, i) => (
+          <Step key={step}>
+            <StepNumber>{String(i + 1).padStart(2, "0")}</StepNumber>
+            <StepTitle>{step}</StepTitle>
+          </Step>
+        ))}
+      </Steps>
+
+      <UnderlineLink href={`mailto:${email}`}>{texts.cta}</UnderlineLink>
+    </SplitSection>
   );
 }

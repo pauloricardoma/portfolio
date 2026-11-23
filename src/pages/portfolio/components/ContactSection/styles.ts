@@ -20,7 +20,7 @@ export const ContactWrapper = styled.div`
 export const ContactSubtitle = styled.p`
   font-size: 18px;
   line-height: 1.6;
-  color: ${({ theme }) => theme.colors.surface.onSurfaceVariant};
+  color: ${({ theme }) => theme.colors.muted};
   max-width: 500px;
   margin: ${spacing.md}px auto 0;
 `;
@@ -38,10 +38,10 @@ export const ContactLinkCard = styled.a`
   align-items: center;
   gap: ${spacing.sm}px;
   padding: ${spacing.md}px ${spacing.lg}px;
-  background-color: ${({ theme }) => theme.colors.surface.surfaceContainer};
-  border: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
-  border-radius: ${borderRadius.lg}px;
-  color: ${({ theme }) => theme.colors.surface.onSurface};
+  background-color: ${({ theme }) => theme.colors.card};
+  border: 1px solid ${({ theme }) => theme.colors.line};
+  border-radius: ${borderRadius.card}px;
+  color: ${({ theme }) => theme.colors.ink};
   font-size: 15px;
   font-weight: 500;
   text-decoration: none;
@@ -49,9 +49,8 @@ export const ContactLinkCard = styled.a`
   cursor: pointer;
 
   &:hover {
-    border-color: ${({ theme }) => theme.colors.primary.primary};
-    background-color: ${({ theme }) => theme.colors.primary.primaryContainer};
-    color: ${({ theme }) => theme.colors.primary.primary};
+    border-color: ${({ theme }) => theme.colors.accent};
+    background-color: ${({ theme }) => theme.colors.accentSoft};
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
@@ -65,11 +64,11 @@ export const LinkIcon = styled.span`
 export const Footer = styled.footer`
   margin-top: ${spacing.xxxl}px;
   padding-top: ${spacing.lg}px;
-  border-top: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
+  border-top: 1px solid ${({ theme }) => theme.colors.line};
   text-align: center;
 `;
 
 export const FooterText = styled.p`
   font-size: 13px;
-  color: ${({ theme }) => theme.colors.surface.onSurfacePlaceholder};
+  color: ${({ theme }) => theme.colors.muted};
 `;

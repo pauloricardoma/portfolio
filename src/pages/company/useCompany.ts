@@ -25,6 +25,7 @@ export function useCompany() {
         id: product.id,
         name: product.name[locale],
         description: product.description[locale],
+        tags: (product.tags ?? []).map((tag) => tag[locale]),
         platforms: product.platforms,
         statusLabel: t.company.products.status[product.status],
         url: product.url,
@@ -38,5 +39,9 @@ export function useCompany() {
     products,
     company: COMPANY,
     portfolioPath: to("/portfolio"),
+    footer: {
+      left: t.company.footer.copyright(new Date().getFullYear()),
+      right: `${t.company.footer.cnpjLabel} ${COMPANY.cnpj}`,
+    },
   };
 }

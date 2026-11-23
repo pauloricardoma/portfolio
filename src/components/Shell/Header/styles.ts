@@ -1,144 +1,137 @@
 import styled, { css } from "styled-components";
-import { spacing, breakpoints, borderRadius } from "~/styles/tokens";
+import { breakpoints, borderRadius, layout } from "~/styles/tokens";
+
+const navHidden = `(max-width: ${breakpoints.nav - 1}px)`;
 
 export const HeaderWrapper = styled.header`
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 100;
-  padding: ${spacing.md}px 0;
-  background-color: ${({ theme }) =>
-    `color-mix(in srgb, ${theme.colors.surface.surface} 80%, transparent)`};
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
+  background-color: ${({ theme }) => theme.colors.bg};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.line};
+  transition: background-color 0.2s ease;
 `;
 
 export const HeaderInner = styled.div`
+  max-width: ${layout.container}px;
+  margin: 0 auto;
+  padding: 14px ${layout.gutter}px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-`;
+  gap: 24px;
+  flex-wrap: wrap;
 
-export const Logo = styled.a`
-  font-size: 16px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.primary.primary};
-  text-decoration: none;
-  letter-spacing: -0.5px;
-`;
-
-export const NavLinks = styled.nav`
-  display: none;
-  gap: ${spacing.lg}px;
-
-  @media (min-width: ${breakpoints.tablet}px) {
-    display: flex;
+  @media ${navHidden} {
+    gap: 12px;
   }
 `;
 
-export const NavLink = styled.a`
-  font-size: 14px;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.surface.onSurfaceVariant};
-  text-decoration: none;
+export const Logo = styled.a`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+export const Wordmark = styled.span`
+  font: 600 18px ${({ theme }) => theme.font.sans};
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+
+  span {
+    font-weight: 400;
+  }
+
+  @media ${navHidden} {
+    font-size: 16px;
+  }
+`;
+
+export const NavLinks = styled.nav`
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+
+  @media ${navHidden} {
+    display: none;
+  }
+`;
+
+const navLinkStyle = css`
+  font: 400 14px ${({ theme }) => theme.font.sans};
+  color: ${({ theme }) => theme.colors.muted};
   transition: color 0.2s ease;
   cursor: pointer;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.primary.primary};
+    color: ${({ theme }) => theme.colors.ink};
   }
+
+  :root[data-theme="dark"] &:hover {
+    color: ${({ theme }) => theme.colors.accent};
+  }
+`;
+
+export const NavLink = styled.a`
+  ${navLinkStyle}
 `;
 
 export const HeaderActions = styled.div`
   display: flex;
   align-items: center;
-  gap: ${spacing.sm}px;
+  gap: 8px;
+
+  @media ${navHidden} {
+    gap: 6px;
+  }
+`;
+
+const outlineButton = css`
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid ${({ theme }) => theme.colors.line};
+  border-radius: ${borderRadius.md}px;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.ink};
+  font: 500 12px ${({ theme }) => theme.font.mono};
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.accent};
+  }
 `;
 
 export const ThemeToggle = styled.button`
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
-  background-color: transparent;
-  color: ${({ theme }) => theme.colors.surface.onSurface};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  transition: all 0.2s ease;
+  ${outlineButton}
+`;
 
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primary.primaryContainer};
-    border-color: ${({ theme }) => theme.colors.primary.primaryOutline};
+export const MenuButton = styled.button`
+  ${outlineButton}
+  display: none;
+
+  @media ${navHidden} {
+    display: inline-flex;
+    align-items: center;
   }
 `;
 
-export const HamburgerButton = styled.button`
-  width: 36px;
-  height: 36px;
-  border-radius: ${borderRadius.md}px;
-  border: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
-  background-color: transparent;
-  color: ${({ theme }) => theme.colors.surface.onSurface};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+export const MobileMenu = styled.nav<{ $open: boolean }>`
+  display: none;
 
-  @media (min-width: ${breakpoints.tablet}px) {
-    display: none;
-  }
-`;
-
-interface MobileMenuProps {
-  $open: boolean;
-}
-
-export const MobileMenu = styled.div<MobileMenuProps>`
-  position: fixed;
-  top: 60px;
-  left: 0;
-  right: 0;
-  background-color: ${({ theme }) =>
-    `color-mix(in srgb, ${theme.colors.surface.surface} 95%, transparent)`};
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
-  padding: ${spacing.lg}px;
-  display: flex;
-  flex-direction: column;
-  gap: ${spacing.md}px;
-  z-index: 99;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-
-  ${({ $open }) =>
-    !$open &&
-    css`
-      transform: translateY(-20px);
-      opacity: 0;
-      pointer-events: none;
-    `}
-
-  @media (min-width: ${breakpoints.tablet}px) {
-    display: none;
+  @media ${navHidden} {
+    display: ${({ $open }) => ($open ? "flex" : "none")};
+    flex-direction: column;
+    max-width: ${layout.container}px;
+    margin: 0 auto;
+    padding: 4px ${layout.gutter}px 16px;
+    gap: 4px;
   }
 `;
 
 export const MobileNavLink = styled.a`
+  ${navLinkStyle}
   font-size: 16px;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.surface.onSurface};
-  text-decoration: none;
-  padding: ${spacing.sm}px 0;
-  text-align: center;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.primary.primary};
-  }
+  padding: 10px 0;
 `;

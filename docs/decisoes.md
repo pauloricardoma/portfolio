@@ -78,13 +78,14 @@ Site da PRMA Code, um estúdio de software que cria os próprios produtos e dese
 ## 6. Design e identidade
 
 - Nome: PRMA Code. Tom direto, sem exageros.
-- **Nova identidade aprovada em 23/11/2026** (handoff em `docs/design_handoff_prma_code_brand_site/`, specs 0005 e 0006). Até a execução, o site no ar segue a identidade antiga abaixo.
+- **Identidade do handoff** (`docs/design_handoff_prma_code_brand_site/`), aprovada em 23/11/2026. Base e home aplicadas no plano 04 (spec 0005); layout do `/portfolio` no plano 05 (spec 0006).
   - Marca "P com cursor"; laranja `#E8743B` como cor de destaque; tokens claro/escuro do handoff.
-  - Fontes Geist e Geist Mono, self-hosted.
-  - Tema segue o sistema, com troca manual salva. O seletor de cor sai (decisão do usuário, 23/11/2026).
+  - Fontes Geist e Geist Mono (OFL), self-hosted em `public/fonts`. Sem Google Fonts.
+  - Tema segue o sistema, com troca manual salva no `localStorage`. Sem seletor de cor (decisão do usuário, 23/11/2026).
+  - Laranja nunca em texto pequeno sobre fundo claro; no claro, hover de link = sublinhado laranja.
   - O carrossel do portfólio continua em Three.js, não no CSS 3D do handoff (decisão do usuário, 23/11/2026). A melhoria da cena é a spec 0007.
-- Identidade antiga (até a 0005 sair): tema escuro por padrão (segue o sistema), azul primário (`#4A7FD4` no escuro, `#0F2B5B` no claro), seletor de cor no header, fonte Inter self-hosted.
 - Portfólio com carrossel 3D (2 celulares + 1 laptop), página da empresa sem 3D.
+- Rodapé: "CNPJ 45.056.853/0001-83" nos dois idiomas (decisão do usuário, 23/11/2026).
 
 ---
 

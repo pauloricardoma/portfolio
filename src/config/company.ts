@@ -5,6 +5,8 @@ export const COMPANY = {
   cnpj: "45.056.853/0001-83",
   founder: {
     name: "Paulo Ricardo Almeida",
+    /** Mesma stack citada na bio */
+    stack: ["React", "React Native", "TypeScript", "Node.js"],
     github: "https://github.com/pauloricardoma",
     linkedin: "https://www.linkedin.com/in/pauloricardoma/",
   },

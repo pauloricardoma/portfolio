@@ -6,6 +6,8 @@ export interface IProduct {
   id: string;
   name: Localized<string>;
   description: Localized<string>;
+  /** Destaques curtos mostrados como chips (opcional) */
+  tags?: Localized<string>[];
   platforms: string[];
   status: ProductStatus;
   url?: string;
@@ -16,6 +18,7 @@ export interface IProductCard {
   id: string;
   name: string;
   description: string;
+  tags: string[];
   platforms: string[];
   statusLabel: string;
   url?: string;

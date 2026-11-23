@@ -20,38 +20,49 @@ export interface IDictionary {
     skills: string;
     menu: string;
     language: string;
-    switchTheme: (toDark: boolean) => string;
+    /** aria-label do botão de tema (o rótulo visível vem de themeLight/themeDark) */
+    toggleTheme: string;
+    /** Rótulo do botão quando o tema atual é escuro (ação: ir para o claro) */
+    themeLight: string;
+    /** Rótulo do botão quando o tema atual é claro (ação: ir para o escuro) */
+    themeDark: string;
   };
   company: {
     hero: {
       kicker: string;
       subtitle: string;
-      scroll: string;
+      ctaPrimary: string;
+      ctaSecondary: string;
     };
+    /** Cada seção tem um rótulo curto (índice "01 / Products") e um título */
     products: {
+      label: string;
       title: string;
-      intro: string;
       status: {
         "coming-soon": string;
         live: string;
       };
     };
     services: {
+      label: string;
       title: string;
       text: string;
+      steps: string[];
       cta: string;
     };
     founder: {
-      title: string;
       label: string;
+      title: string;
       text: string;
       cta: string;
     };
     contact: {
+      label: string;
       title: string;
       subtitle: string;
     };
     footer: {
+      copyright: (year: number) => string;
       cnpjLabel: string;
     };
   };

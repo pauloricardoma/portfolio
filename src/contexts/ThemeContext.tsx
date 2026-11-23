@@ -3,104 +3,68 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useState,
   type ReactNode,
 } from "react";
 import { ThemeProvider } from "styled-components";
-import light from "~/styles/themes/light";
-import dark from "~/styles/themes/dark";
-import type { ITheme, IPrimaryColors } from "~/styles/themes/types";
-
-type ThemeMode = "light" | "dark";
+import theme from "~/styles/themes/theme";
+import { colors, type ThemeMode } from "~/styles/tokens";
 
 interface ThemeContextData {
+  /**
+   * Tema em uso. No SSR e na hidratação vale "light"; o valor real chega
+   * depois de montar. Use só para o que não dá para fazer em CSS
+   * (cores da cena 3D, por exemplo). Texto e estilo por tema ficam no CSS.
+   */
   themeMode: ThemeMode;
   toggleTheme: () => void;
-  primaryColor: string;
-  setPrimaryColor: (color: string) => void;
 }
 
-const ThemeContext = createContext<ThemeContextData>({} as ThemeContextData);
+const ThemeContext = createContext<ThemeContextData | null>(null);
 
-const DEFAULT_PRIMARY = {
-  light: "#0F2B5B",
-  dark: "#4A7FD4",
-};
+function readThemeMode(): ThemeMode {
+  const attr = document.documentElement.getAttribute("data-theme");
+  if (attr === "light" || attr === "dark") return attr;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
 
-function buildPrimaryColors(color: string, surfaceColor: string): IPrimaryColors {
-  return {
-    primary: color,
-    primaryHover: `color-mix(in srgb, ${color} 85%, ${surfaceColor})`,
-    primaryPressed: `color-mix(in srgb, ${color} 70%, ${surfaceColor})`,
-    primaryOutline: `color-mix(in srgb, ${color} 50%, transparent)`,
-    primaryContainer: `color-mix(in srgb, ${color} 14%, ${surfaceColor})`,
-    onPrimary: "#FFFFFF",
-  };
+function applyThemeMode(mode: ThemeMode) {
+  document.documentElement.setAttribute("data-theme", mode);
+  document
+    .querySelectorAll('meta[name="theme-color"]')
+    .forEach((meta) => meta.setAttribute("content", colors[mode].bg));
+  try {
+    localStorage.setItem("theme", mode);
+  } catch {
+    // localStorage indisponível (modo privado): o tema vale só nesta visita
+  }
 }
 
 export function AppThemeProvider({ children }: { children: ReactNode }) {
-  const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
-  const [primaryColor, setPrimaryColorState] = useState<string>("");
-  const [hydrated, setHydrated] = useState(false);
+  const [themeMode, setThemeMode] = useState<ThemeMode>("light");
 
   useEffect(() => {
-    const stored = localStorage.getItem("theme") as ThemeMode | null;
-    if (stored === "light" || stored === "dark") {
-      setThemeMode(stored);
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setThemeMode(prefersDark ? "dark" : "light");
-    }
+    setThemeMode(readThemeMode());
 
-    const storedColor = localStorage.getItem("primaryColor");
-    if (storedColor) {
-      setPrimaryColorState(storedColor);
-    }
-
-    setHydrated(true);
+    // Sem escolha manual, acompanha a troca de tema do sistema
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => {
+      if (!document.documentElement.hasAttribute("data-theme")) {
+        setThemeMode(media.matches ? "dark" : "light");
+      }
+    };
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemeMode((prev) => (prev === "light" ? "dark" : "light"));
+    const next: ThemeMode = readThemeMode() === "dark" ? "light" : "dark";
+    applyThemeMode(next);
+    setThemeMode(next);
   }, []);
-
-  const setPrimaryColor = useCallback((color: string) => {
-    setPrimaryColorState(color);
-  }, []);
-
-  useEffect(() => {
-    if (hydrated) localStorage.setItem("theme", themeMode);
-  }, [themeMode, hydrated]);
-
-  useEffect(() => {
-    if (hydrated && primaryColor) {
-      localStorage.setItem("primaryColor", primaryColor);
-    }
-  }, [primaryColor, hydrated]);
-
-  const theme: ITheme = useMemo(() => {
-    const baseTheme = themeMode === "light" ? light : dark;
-
-    const activeColor = primaryColor || DEFAULT_PRIMARY[themeMode];
-
-    if (activeColor === DEFAULT_PRIMARY[themeMode] && !primaryColor) {
-      return baseTheme;
-    }
-
-    return {
-      ...baseTheme,
-      colors: {
-        ...baseTheme.colors,
-        primary: buildPrimaryColors(activeColor, baseTheme.colors.surface.surface),
-      },
-    };
-  }, [themeMode, primaryColor]);
 
   return (
-    <ThemeContext.Provider
-      value={{ themeMode, toggleTheme, primaryColor, setPrimaryColor }}
-    >
+    <ThemeContext.Provider value={{ themeMode, toggleTheme }}>
       <ThemeProvider theme={theme}>{children}</ThemeProvider>
     </ThemeContext.Provider>
   );
@@ -108,7 +72,7 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
 
 export function useAppTheme() {
   const context = useContext(ThemeContext);
-  if (!context.toggleTheme) {
+  if (!context) {
     throw new Error("useAppTheme deve ser usado dentro de AppThemeProvider");
   }
   return context;

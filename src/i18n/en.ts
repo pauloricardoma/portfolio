@@ -20,40 +20,47 @@ const en: IDictionary = {
     skills: "Skills",
     menu: "Menu",
     language: "Language",
-    switchTheme: (toDark) => `Switch to ${toDark ? "dark" : "light"} theme`,
+    toggleTheme: "Switch theme",
+    themeLight: "Light",
+    themeDark: "Dark",
   },
   company: {
     hero: {
       kicker: "Software studio",
       subtitle:
         "PRMA Code is a software studio. We build our own digital products and develop mobile and web apps for clients.",
-      scroll: "Scroll",
+      ctaPrimary: "Talk about a project →",
+      ctaSecondary: "See what we're building",
     },
     products: {
-      title: "Products",
-      intro: "What we're building.",
+      label: "Products",
+      title: "What we're building.",
       status: {
         "coming-soon": "Coming soon",
         live: "Available",
       },
     },
     services: {
+      label: "Services",
       title: "Client projects",
       text: "Alongside our own products, we build mobile and web apps for clients, end to end: from planning and design to launch on the App Store and Google Play.",
-      cta: "Talk about a project",
+      steps: ["Planning", "Design", "Development", "App Store & Google Play"],
+      cta: "Talk about a project →",
     },
     founder: {
-      title: "Who's behind it",
       label: "Founder",
+      title: "Who's behind it",
       text: "PRMA Code was founded by Paulo Ricardo Almeida, a software engineer who builds web and mobile applications with React, React Native, TypeScript and Node.js.",
       cta: "View portfolio →",
     },
     contact: {
+      label: "Contact",
       title: "Get in touch",
       subtitle: "Have a project in mind, or questions about our products? Email us at:",
     },
     footer: {
-      cnpjLabel: "CNPJ (Brazilian company registration)",
+      copyright: (year) => `© ${year} PRMA Code`,
+      cnpjLabel: "CNPJ",
     },
   },
   portfolio: {

@@ -12,22 +12,27 @@ import { AppThemeProvider } from "~/contexts/ThemeContext";
 import { GlobalStyle } from "~/styles/global";
 import { getLocaleFromPath, htmlLang } from "~/i18n/locale";
 import { useLocale } from "~/hooks/useLocale";
+import { THEME_INIT_SCRIPT } from "~/styles/themeScript";
+import { colors } from "~/styles/tokens";
 
 export const links: Route.LinksFunction = () => [
   {
     rel: "preload",
-    href: "/fonts/inter-400.woff2",
+    href: "/fonts/geist-400.woff2",
     as: "font",
     type: "font/woff2",
     crossOrigin: "anonymous",
   },
   {
     rel: "preload",
-    href: "/fonts/inter-700.woff2",
+    href: "/fonts/geist-600.woff2",
     as: "font",
     type: "font/woff2",
     crossOrigin: "anonymous",
   },
+  { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+  { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+  { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -35,10 +40,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const locale = getLocaleFromPath(pathname);
 
   return (
-    <html lang={htmlLang[locale]}>
+    // data-theme é definido pelo script abaixo antes da hidratação
+    <html lang={htmlLang[locale]} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content={colors.light.bg}
+        />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: dark)"
+          content={colors.dark.bg}
+        />
+        {/* Conteúdo fixo do repositório (seguranca.md §4) */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <Meta />
         <Links />
         <noscript>

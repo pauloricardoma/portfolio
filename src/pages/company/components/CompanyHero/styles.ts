@@ -1,96 +1,71 @@
 import styled, { keyframes } from "styled-components";
-import { spacing, breakpoints } from "~/styles/tokens";
+import { layout, type } from "~/styles/tokens";
 
-export const HeroWrapper = styled.div`
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
+const enter = keyframes`
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
 `;
 
-/** Filhos nascem com visibility: hidden e o GSAP revela (evita flash no SSR). */
-export const HeroContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: ${spacing.lg}px;
-  max-width: 900px;
+export const HeroWrapper = styled.section`
+  max-width: ${layout.container}px;
   margin: 0 auto;
-  padding: 0 ${spacing.lg}px;
-
-  .hero-kicker,
-  .hero-title,
-  .hero-accent,
-  .hero-subtitle {
-    visibility: hidden;
-  }
-`;
-
-export const Kicker = styled.p`
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: ${({ theme }) => theme.colors.primary.primary};
-`;
-
-export const HeroSubtitle = styled.p`
-  font-size: 18px;
-  line-height: 1.6;
-  color: ${({ theme }) => theme.colors.surface.onSurfaceVariant};
-  max-width: 600px;
-
-  @media (min-width: ${breakpoints.tablet}px) {
-    font-size: 20px;
-  }
-`;
-
-export const AccentLine = styled.div`
-  width: 60px;
-  height: 3px;
-  background-color: ${({ theme }) => theme.colors.primary.primary};
-  border-radius: 2px;
-`;
-
-const bounce = keyframes`
-  0%, 100% {
-    transform: translateY(0);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translateY(12px);
-    opacity: 1;
-  }
-`;
-
-export const ScrollIndicator = styled.div`
-  position: absolute;
-  bottom: ${spacing.xl}px;
+  padding: ${layout.heroPaddingTop}px ${layout.gutter}px ${layout.sectionPadding}px;
   display: flex;
   flex-direction: column;
+  gap: 32px;
+
+  > * {
+    animation: ${enter} 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  > :nth-child(2) { animation-delay: 0.08s; }
+  > :nth-child(3) { animation-delay: 0.16s; }
+  > :nth-child(4) { animation-delay: 0.24s; }
+`;
+
+export const Eyebrow = styled.p`
+  display: flex;
   align-items: center;
-  gap: ${spacing.sm}px;
-  animation: ${bounce} 2s ease-in-out infinite;
-  cursor: pointer;
-  visibility: hidden;
-`;
-
-export const ScrollText = styled.span`
-  font-size: 12px;
+  gap: 10px;
+  font: ${type.eyebrow} ${({ theme }) => theme.font.mono};
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  color: ${({ theme }) => theme.colors.surface.onSurfaceVariant};
+  color: ${({ theme }) => theme.colors.muted};
 `;
 
-export const ScrollArrow = styled.div`
-  width: 20px;
-  height: 20px;
-  border-right: 2px solid ${({ theme }) => theme.colors.surface.onSurfaceVariant};
-  border-bottom: 2px solid ${({ theme }) => theme.colors.surface.onSurfaceVariant};
-  transform: rotate(45deg);
+export const EyebrowSquare = styled.span`
+  width: 8px;
+  height: 8px;
+  background: ${({ theme }) => theme.colors.accent};
+`;
+
+export const Title = styled.h1`
+  font: ${type.heroTitle} ${({ theme }) => theme.font.sans};
+  letter-spacing: ${type.heroTracking};
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0 0.22em;
+`;
+
+export const TitleEnd = styled.span`
+  display: flex;
+  align-items: flex-end;
+  gap: 0.06em;
+
+  > span:first-child {
+    font-weight: 400;
+  }
+`;
+
+export const Lead = styled.p`
+  max-width: 620px;
+  font: ${type.lead} ${({ theme }) => theme.font.sans};
+  color: ${({ theme }) => theme.colors.muted};
+  text-wrap: pretty;
+`;
+
+export const Actions = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 `;

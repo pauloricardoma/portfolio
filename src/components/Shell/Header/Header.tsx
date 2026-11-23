@@ -1,7 +1,6 @@
 import { useState, useCallback, type MouseEvent } from "react";
 import { Link } from "react-router";
-import Container from "~/components/UI/Container/Container";
-import ColorPicker from "~/components/UI/ColorPicker/ColorPicker";
+import LogoMark from "~/components/Brand/LogoMark/LogoMark";
 import LanguageToggle from "~/components/Shell/LanguageToggle/LanguageToggle";
 import { useAppTheme } from "~/contexts/ThemeContext";
 import { useLocale } from "~/hooks/useLocale";
@@ -10,11 +9,12 @@ import {
   HeaderWrapper,
   HeaderInner,
   Logo,
+  Wordmark,
   NavLinks,
   NavLink,
   HeaderActions,
   ThemeToggle,
-  HamburgerButton,
+  MenuButton,
   MobileMenu,
   MobileNavLink,
 } from "./styles";
@@ -26,20 +26,15 @@ interface HeaderProps {
 }
 
 export default function Header({ navItems, logoHref }: HeaderProps) {
-  const { themeMode, toggleTheme } = useAppTheme();
+  const { toggleTheme } = useAppTheme();
   const { t, to } = useLocale();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleAnchor = useCallback(
-    (e: MouseEvent<HTMLAnchorElement>, href: string) => {
-      e.preventDefault();
-      document
-        .getElementById(href.replace("#", ""))
-        ?.scrollIntoView({ behavior: "smooth" });
-      setMobileMenuOpen(false);
-    },
-    []
-  );
+  const handleAnchor = useCallback((e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    document.getElementById(href.replace("#", ""))?.scrollIntoView({ behavior: "smooth" });
+    setMobileMenuOpen(false);
+  }, []);
 
   const renderItem = (item: INavItem, mobile: boolean) => {
     const Component = mobile ? MobileNavLink : NavLink;
@@ -63,52 +58,53 @@ export default function Header({ navItems, logoHref }: HeaderProps) {
     );
   };
 
-  const isAnchorLogo = logoHref.startsWith("#");
+  const logoContent = (
+    <>
+      <LogoMark size={30} />
+      <Wordmark>
+        PRMA <span>Code</span>
+      </Wordmark>
+    </>
+  );
 
   return (
-    <>
-      <HeaderWrapper>
-        <Container>
-          <HeaderInner>
-            {isAnchorLogo ? (
-              <Logo href={logoHref} onClick={(e) => handleAnchor(e, logoHref)}>
-                PRMA Code
-              </Logo>
-            ) : (
-              <Logo as={Link} to={to(logoHref)}>
-                PRMA Code
-              </Logo>
-            )}
+    <HeaderWrapper>
+      <HeaderInner>
+        {logoHref.startsWith("#") ? (
+          <Logo href={logoHref} onClick={(e) => handleAnchor(e, logoHref)}>
+            {logoContent}
+          </Logo>
+        ) : (
+          <Logo as={Link} to={to(logoHref)}>
+            {logoContent}
+          </Logo>
+        )}
 
-            <NavLinks>{navItems.map((item) => renderItem(item, false))}</NavLinks>
+        <NavLinks>{navItems.map((item) => renderItem(item, false))}</NavLinks>
 
-            <HeaderActions>
-              <LanguageToggle />
+        <HeaderActions>
+          <LanguageToggle />
 
-              <ColorPicker />
+          {/* Rótulo por CSS ([data-theme]): o SSR não sabe o tema do visitante */}
+          <ThemeToggle onClick={toggleTheme} aria-label={t.header.toggleTheme}>
+            <span className="only-light">{t.header.themeDark}</span>
+            <span className="only-dark">{t.header.themeLight}</span>
+          </ThemeToggle>
 
-              <ThemeToggle
-                onClick={toggleTheme}
-                aria-label={t.header.switchTheme(themeMode === "light")}
-              >
-                {themeMode === "light" ? "🌙" : "☀️"}
-              </ThemeToggle>
+          <MenuButton
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label={t.header.menu}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
+          >
+            {mobileMenuOpen ? "✕" : "☰"}
+          </MenuButton>
+        </HeaderActions>
+      </HeaderInner>
 
-              <HamburgerButton
-                onClick={() => setMobileMenuOpen((prev) => !prev)}
-                aria-label={t.header.menu}
-                aria-expanded={mobileMenuOpen}
-              >
-                {mobileMenuOpen ? "✕" : "☰"}
-              </HamburgerButton>
-            </HeaderActions>
-          </HeaderInner>
-        </Container>
-      </HeaderWrapper>
-
-      <MobileMenu $open={mobileMenuOpen}>
+      <MobileMenu id="mobile-menu" $open={mobileMenuOpen}>
         {navItems.map((item) => renderItem(item, true))}
       </MobileMenu>
-    </>
+    </HeaderWrapper>
   );
 }

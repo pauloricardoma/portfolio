@@ -1,54 +1,30 @@
-import Section from "~/components/UI/Section/Section";
-import Container from "~/components/UI/Container/Container";
-import Text from "~/components/UI/Text/Text";
+import Cursor from "~/components/Brand/Cursor/Cursor";
 import { useReveal } from "~/hooks/useReveal";
 import type { IDictionary } from "~/i18n/types";
-import {
-  ContactWrapper,
-  ContactSubtitle,
-  EmailCard,
-  Footer,
-  FooterText,
-} from "./styles";
+import { ContactBand, ContactInner, Label, Title, Subtitle, EmailLink } from "./styles";
 
 interface CompanyContactProps {
+  index: string;
   texts: IDictionary["company"]["contact"];
-  cnpjLabel: string;
-  companyName: string;
   email: string;
-  cnpj: string;
 }
 
-export default function CompanyContact({
-  texts,
-  cnpjLabel,
-  companyName,
-  email,
-  cnpj,
-}: CompanyContactProps) {
-  const ref = useReveal();
+export default function CompanyContact({ index, texts, email }: CompanyContactProps) {
+  const ref = useReveal<HTMLElement>();
 
   return (
-    <Section id="contact">
-      <ContactWrapper ref={ref}>
-        <Container>
-          <Text variant="h1" align="center" className="reveal">
-            {texts.title}
-          </Text>
-          <ContactSubtitle className="reveal">{texts.subtitle}</ContactSubtitle>
-
-          <EmailCard href={`mailto:${email}`} className="reveal">
-            <span aria-hidden="true">✉️</span>
-            {email}
-          </EmailCard>
-
-          <Footer>
-            <FooterText>
-              &copy; {new Date().getFullYear()} {companyName} · {cnpjLabel}: {cnpj}
-            </FooterText>
-          </Footer>
-        </Container>
-      </ContactWrapper>
-    </Section>
+    <ContactBand id="contact" ref={ref} aria-labelledby="contact-title">
+      <ContactInner className="reveal">
+        <Label>
+          {index} / {texts.label}
+        </Label>
+        <Title id="contact-title">{texts.title}</Title>
+        <Subtitle>{texts.subtitle}</Subtitle>
+        <EmailLink href={`mailto:${email}`}>
+          {email}
+          <Cursor width="0.55em" height="0.08em" offset="0.18em" />
+        </EmailLink>
+      </ContactInner>
+    </ContactBand>
   );
 }

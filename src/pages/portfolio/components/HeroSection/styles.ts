@@ -61,7 +61,7 @@ export const HeroContent = styled.div`
 export const HeroSubtitle = styled.p`
   font-size: 18px;
   line-height: 1.6;
-  color: ${({ theme }) => theme.colors.surface.onSurfaceVariant};
+  color: ${({ theme }) => theme.colors.muted};
   max-width: 600px;
 
   @media (min-width: ${breakpoints.tablet}px) {
@@ -76,7 +76,7 @@ export const HeroSubtitle = styled.p`
 export const AccentLine = styled.div`
   width: 60px;
   height: 3px;
-  background-color: ${({ theme }) => theme.colors.primary.primary};
+  background-color: ${({ theme }) => theme.colors.accent};
   border-radius: 2px;
 `;
 
@@ -118,7 +118,7 @@ export const ScrollText = styled.span`
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: ${({ theme }) => theme.colors.surface.onSurfaceVariant};
+  color: ${({ theme }) => theme.colors.muted};
 `;
 
 /**
@@ -128,7 +128,7 @@ export const ScrollText = styled.span`
 export const ScrollArrow = styled.div`
   width: 20px;
   height: 20px;
-  border-right: 2px solid ${({ theme }) => theme.colors.surface.onSurfaceVariant};
-  border-bottom: 2px solid ${({ theme }) => theme.colors.surface.onSurfaceVariant};
+  border-right: 2px solid ${({ theme }) => theme.colors.muted};
+  border-bottom: 2px solid ${({ theme }) => theme.colors.muted};
   transform: rotate(45deg);
 `;

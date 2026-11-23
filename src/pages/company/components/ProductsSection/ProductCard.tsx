@@ -1,40 +1,53 @@
-import Text from "~/components/UI/Text/Text";
+import Cursor from "~/components/Brand/Cursor/Cursor";
+import Chip from "~/components/UI/Chip/Chip";
+import { ChipList } from "~/components/UI/Chip/styles";
 import type { IProductCard } from "~/interfaces/company/IProduct";
 import {
   Card,
   CardHeader,
-  StatusBadge,
-  PlatformList,
-  PlatformTag,
+  ProductName,
+  StatusPill,
+  Description,
+  Platforms,
   ProductLink,
 } from "./styles";
 
 interface ProductCardProps {
   product: IProductCard;
-  className?: string;
 }
 
-export default function ProductCard({ product, className }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <Card className={className}>
+    <Card>
       <CardHeader>
-        <Text variant="h3">{product.name}</Text>
-        <StatusBadge>{product.statusLabel}</StatusBadge>
+        <ProductName>{product.name}</ProductName>
+        <StatusPill>
+          <Cursor width="8px" height="3px" />
+          {product.statusLabel}
+        </StatusPill>
       </CardHeader>
 
-      <Text variant="body" style={{ marginTop: 12, opacity: 0.85 }}>
-        {product.description}
-      </Text>
+      <Description>{product.description}</Description>
 
-      <PlatformList>
+      {product.tags.length > 0 && (
+        <ChipList>
+          {product.tags.map((tag) => (
+            <Chip key={tag} filled>
+              {tag}
+            </Chip>
+          ))}
+        </ChipList>
+      )}
+
+      <Platforms>
         {product.platforms.map((platform) => (
-          <PlatformTag key={platform}>{platform}</PlatformTag>
+          <li key={platform}>{platform}</li>
         ))}
-      </PlatformList>
+      </Platforms>
 
       {product.url && (
         <ProductLink href={product.url} target="_blank" rel="noopener noreferrer">
-          {product.url.replace(/^https?:\/\//, "")} →
+          {product.url.replace(/^https?:\/\//, "")} ↗
         </ProductLink>
       )}
     </Card>

@@ -37,12 +37,18 @@
  */
 import { useRef, useCallback, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useTheme } from "styled-components";
 import gsap from "gsap";
 import type { Group } from "three";
 import type { IProject } from "~/interfaces/portfolio/IProject";
 import DevicePhone from "~/components/3D/DevicePhone";
 import DeviceLaptop from "~/components/3D/DeviceLaptop";
+import { colors } from "~/styles/tokens";
+
+/**
+ * Carcaça dos aparelhos: grafite fixo nos dois temas. Three.js não lê var(--…),
+ * por isso o hex vem dos tokens. Cor por tema fica para a spec 0007.
+ */
+const DEVICE_COLOR = colors.dark.line;
 
 interface ProjectsCarouselProps {
   projects: IProject[];
@@ -69,7 +75,6 @@ export default function ProjectsCarousel({
   orbitRadius = ORBIT_RADIUS,
   laptopScale = 1.3,
 }: ProjectsCarouselProps) {
-  const theme = useTheme();
   const radius = orbitRadius;
 
   /**
@@ -311,9 +316,9 @@ export default function ProjectsCarousel({
           }}
         >
           {project.type === "mobile" ? (
-            <DevicePhone screenTexture={project.screenshot} color={theme.colors.tertiary.tertiary} />
+            <DevicePhone screenTexture={project.screenshot} color={DEVICE_COLOR} />
           ) : (
-            <DeviceLaptop screenTexture={project.screenshot} color={theme.colors.tertiary.tertiary} scale={laptopScale} />
+            <DeviceLaptop screenTexture={project.screenshot} color={DEVICE_COLOR} scale={laptopScale} />
           )}
         </group>
       ))}
