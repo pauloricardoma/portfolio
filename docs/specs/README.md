@@ -8,7 +8,7 @@ Status: `ideia` (só o título, no backlog) → `rascunho` → `aprovada` → `p
 | ---- | ---- | ------ | ------ |
 | 0001 | LCP do hero: entrada em CSS, sem depender do JS para mostrar o texto (empresa e portfólio). Os dois heroes já entram em CSS (planos 04 e 05); falta medir o LCP no PageSpeed | ideia | — |
 | 0002 | Revisão no celular: header (idioma, cor, tema, menu) e seções em telas pequenas | ideia | — |
-| 0003 | `netlify.toml`: headers de segurança (CSP, HSTS, X-Frame-Options), cache de assets e `yarn start` funcionando. A CSP precisa liberar o script inline de tema (`src/styles/themeScript.ts`) por hash: hoje `sha256-JTMuLizYteBdxBy+dDOvTfc7rTpKhRj1XK6/e3d+XME=`, recalcular a cada mudança no script. No `/portfolio`, conferir que a CSP não bloqueia os chunks lazy do Three.js nem as texturas (`img-src 'self'`, e `blob:` se o loader usar); se bloquear, o `WebGLBoundary` cai na screenshot sem avisar | ideia | — |
+| 0003 | [Headers de segurança, cache de assets e `yarn start`](0003-security-headers-cache.md) | concluída | 08 |
 | 0004 | Página de produto (`/products/<app>`) quando o app de jogos for lançado, com link para a landing própria | ideia (depois) | — |
 | 0005 | [Identidade visual: base da marca e home](0005-brand-identity-home.md) | concluída | 04 |
 | 0006 | [Identidade visual: redesign do /portfolio](0006-portfolio-redesign.md) (depende da 0005) | concluída | 05 |
