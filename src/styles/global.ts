@@ -93,4 +93,9 @@ export const GlobalStyle = createGlobalStyle`
       border-radius: 4px;
     }
   }
+
+  /* Elementos animados por useReveal: nascem escondidos para evitar flash/CLS */
+  .reveal {
+    visibility: hidden;
+  }
 `;

@@ -1,7 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, type MouseEvent } from "react";
+import { Link } from "react-router";
 import Container from "~/components/UI/Container/Container";
 import ColorPicker from "~/components/UI/ColorPicker/ColorPicker";
+import LanguageToggle from "~/components/Shell/LanguageToggle/LanguageToggle";
 import { useAppTheme } from "~/contexts/ThemeContext";
+import { useLocale } from "~/hooks/useLocale";
+import type { INavItem } from "~/interfaces/shell/INavItem";
 import {
   HeaderWrapper,
   HeaderInner,
@@ -15,77 +19,85 @@ import {
   MobileNavLink,
 } from "./styles";
 
-const NAV_ITEMS = [
-  { label: "Início", href: "#hero" },
-  { label: "Projetos", href: "#projects" },
-  { label: "Skills", href: "#skills" },
-  { label: "Contato", href: "#contact" },
-];
+interface HeaderProps {
+  navItems: INavItem[];
+  /** "#id" rola até a âncora; um caminho ("/") navega para a rota */
+  logoHref: string;
+}
 
-export default function Header() {
+export default function Header({ navItems, logoHref }: HeaderProps) {
   const { themeMode, toggleTheme } = useAppTheme();
-  const [isVisible, setIsVisible] = useState(false);
+  const { t, to } = useLocale();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const threshold = window.innerHeight * 0.5;
-      setIsVisible(scrollY > threshold);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollTo = useCallback(
-    (href: string) => {
-      const id = href.replace("#", "");
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const handleAnchor = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+      e.preventDefault();
+      document
+        .getElementById(href.replace("#", ""))
+        ?.scrollIntoView({ behavior: "smooth" });
       setMobileMenuOpen(false);
     },
     []
   );
 
+  const renderItem = (item: INavItem, mobile: boolean) => {
+    const Component = mobile ? MobileNavLink : NavLink;
+
+    if (item.kind === "route") {
+      return (
+        <Component key={item.href} as={Link} to={to(item.href)}>
+          {item.label}
+        </Component>
+      );
+    }
+
+    return (
+      <Component
+        key={item.href}
+        href={item.href}
+        onClick={(e: MouseEvent<HTMLAnchorElement>) => handleAnchor(e, item.href)}
+      >
+        {item.label}
+      </Component>
+    );
+  };
+
+  const isAnchorLogo = logoHref.startsWith("#");
+
   return (
     <>
-      <HeaderWrapper $visible={isVisible}>
+      <HeaderWrapper>
         <Container>
           <HeaderInner>
-            <Logo href="#hero" onClick={(e) => { e.preventDefault(); scrollTo("#hero"); }}>
-              PRMA Code
-            </Logo>
+            {isAnchorLogo ? (
+              <Logo href={logoHref} onClick={(e) => handleAnchor(e, logoHref)}>
+                PRMA Code
+              </Logo>
+            ) : (
+              <Logo as={Link} to={to(logoHref)}>
+                PRMA Code
+              </Logo>
+            )}
 
-            <NavLinks>
-              {NAV_ITEMS.map((item) => (
-                <NavLink
-                  key={item.href}
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollTo(item.href);
-                  }}
-                >
-                  {item.label}
-                </NavLink>
-              ))}
-            </NavLinks>
+            <NavLinks>{navItems.map((item) => renderItem(item, false))}</NavLinks>
 
             <HeaderActions>
+              <LanguageToggle />
+
               <ColorPicker />
 
               <ThemeToggle
                 onClick={toggleTheme}
-                aria-label={`Mudar para tema ${themeMode === "light" ? "escuro" : "claro"}`}
+                aria-label={t.header.switchTheme(themeMode === "light")}
               >
                 {themeMode === "light" ? "🌙" : "☀️"}
               </ThemeToggle>
 
               <HamburgerButton
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
-                aria-label="Menu"
+                aria-label={t.header.menu}
+                aria-expanded={mobileMenuOpen}
               >
                 {mobileMenuOpen ? "✕" : "☰"}
               </HamburgerButton>
@@ -94,19 +106,8 @@ export default function Header() {
         </Container>
       </HeaderWrapper>
 
-      <MobileMenu $open={mobileMenuOpen && isVisible}>
-        {NAV_ITEMS.map((item) => (
-          <MobileNavLink
-            key={item.href}
-            href={item.href}
-            onClick={(e) => {
-              e.preventDefault();
-              scrollTo(item.href);
-            }}
-          >
-            {item.label}
-          </MobileNavLink>
-        ))}
+      <MobileMenu $open={mobileMenuOpen}>
+        {navItems.map((item) => renderItem(item, true))}
       </MobileMenu>
     </>
   );

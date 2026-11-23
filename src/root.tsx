@@ -5,11 +5,13 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 import type { Route } from "./+types/root";
 import { AppThemeProvider } from "~/contexts/ThemeContext";
 import { GlobalStyle } from "~/styles/global";
-import Header from "~/components/Shell/Header/Header";
+import { getLocaleFromPath, htmlLang } from "~/i18n/locale";
+import { useLocale } from "~/hooks/useLocale";
 
 export const links: Route.LinksFunction = () => [
   {
@@ -29,13 +31,19 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+  const locale = getLocaleFromPath(pathname);
+
   return (
-    <html lang="pt-BR">
+    <html lang={htmlLang[locale]}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <noscript>
+          <style>{`.reveal { visibility: visible !important; }`}</style>
+        </noscript>
       </head>
       <body>
         <AppThemeProvider>
@@ -50,25 +58,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return (
-    <>
-      <Header />
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  const { t } = useLocale();
   let message = "Oops!";
-  let details = "Ocorreu um erro inesperado.";
+  let details = t.errors.unexpected;
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Erro";
+    message = error.status === 404 ? "404" : t.errors.title;
     details =
-      error.status === 404
-        ? "A página solicitada não foi encontrada."
-        : error.statusText || details;
+      error.status === 404 ? t.errors.notFound : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;

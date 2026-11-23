@@ -1,11 +1,7 @@
 import styled, { css } from "styled-components";
 import { spacing, breakpoints, borderRadius } from "~/styles/tokens";
 
-interface HeaderWrapperProps {
-  $visible: boolean;
-}
-
-export const HeaderWrapper = styled.header<HeaderWrapperProps>`
+export const HeaderWrapper = styled.header`
   position: fixed;
   top: 0;
   left: 0;
@@ -17,15 +13,6 @@ export const HeaderWrapper = styled.header<HeaderWrapperProps>`
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid ${({ theme }) => theme.colors.surface.surfaceOutline};
-  transition: transform 0.3s ease, opacity 0.3s ease;
-
-  ${({ $visible }) =>
-    !$visible &&
-    css`
-      transform: translateY(-100%);
-      opacity: 0;
-      pointer-events: none;
-    `}
 `;
 
 export const HeaderInner = styled.div`

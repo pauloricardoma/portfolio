@@ -1,3 +1,11 @@
-import { type RouteConfig, index } from "@react-router/dev/routes";
+import { type RouteConfig, index, prefix, route } from "@react-router/dev/routes";
 
-export default [index("routes/home.tsx")] satisfies RouteConfig;
+/** Inglês na raiz, português sob /pt. Mesmos módulos, ids diferentes. */
+export default [
+  index("routes/company.tsx", { id: "company-en" }),
+  route("portfolio", "routes/portfolio.tsx", { id: "portfolio-en" }),
+  ...prefix("pt", [
+    index("routes/company.tsx", { id: "company-pt" }),
+    route("portfolio", "routes/portfolio.tsx", { id: "portfolio-pt" }),
+  ]),
+] satisfies RouteConfig;

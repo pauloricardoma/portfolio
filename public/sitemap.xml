@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://prmacode.dev/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://prmacode.dev/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://prmacode.dev/pt"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://prmacode.dev/"/>
+  </url>
+  <url>
+    <loc>https://prmacode.dev/pt</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://prmacode.dev/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://prmacode.dev/pt"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://prmacode.dev/"/>
+  </url>
+  <url>
+    <loc>https://prmacode.dev/portfolio</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://prmacode.dev/portfolio"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://prmacode.dev/pt/portfolio"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://prmacode.dev/portfolio"/>
+  </url>
+  <url>
+    <loc>https://prmacode.dev/pt/portfolio</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://prmacode.dev/portfolio"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://prmacode.dev/pt/portfolio"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://prmacode.dev/portfolio"/>
+  </url>
+</urlset>
