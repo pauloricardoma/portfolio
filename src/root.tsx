@@ -7,7 +7,9 @@ import {
   ScrollRestoration,
   useLocation,
 } from "react-router";
+import { useContext } from "react";
 import type { Route } from "./+types/root";
+import { NonceContext } from "~/contexts/NonceContext";
 import { AppThemeProvider } from "~/contexts/ThemeContext";
 import { GlobalStyle } from "~/styles/global";
 import { getLocaleFromPath, htmlLang } from "~/i18n/locale";
@@ -38,6 +40,8 @@ export const links: Route.LinksFunction = () => [
 export function Layout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const locale = getLocaleFromPath(pathname);
+  /** Nonce da CSP (spec 0003): todo script inline precisa dele. "" no cliente. */
+  const nonce = useContext(NonceContext);
 
   return (
     // data-theme é definido pelo script abaixo antes da hidratação
@@ -55,8 +59,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
           media="(prefers-color-scheme: dark)"
           content={colors.dark.bg}
         />
-        {/* Conteúdo fixo do repositório (seguranca.md §4) */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* Conteúdo fixo do repositório (seguranca.md §4). O navegador esconde o
+            nonce depois de ler, então o cliente hidrata com "" sem reclamar. */}
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
         <Meta />
         <Links />
         <noscript>
@@ -68,8 +77,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <GlobalStyle />
           {children}
         </AppThemeProvider>
-        <ScrollRestoration />
-        <Scripts />
+        <ScrollRestoration nonce={nonce} />
+        <Scripts nonce={nonce} />
       </body>
     </html>
   );

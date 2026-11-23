@@ -1,0 +1,48 @@
+# Headers e cache dos arquivos estáticos (spec 0003, ADR 0005).
+#
+# Os headers do HTML (CSP com nonce, HSTS, X-Frame-Options etc.) NÃO ficam aqui:
+# o HTML sai do SSR (Netlify Function) e é o src/entry.server.tsx que os define
+# (src/config/security.ts). Build command e publish dir continuam os da Netlify
+# e do @netlify/vite-plugin-react-router.
+
+# Básicos para tudo o que o CDN serve direto (assets, fontes, imagens)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# Nome com hash do Vite: muda a cada build, pode ficar em cache para sempre
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Fontes sem hash no nome: 30 dias
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+# Imagens sem hash no nome: 1 dia
+[[headers]]
+  for = "/projects/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/og-image.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/favicon.*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/apple-touch-icon.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

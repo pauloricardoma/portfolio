@@ -39,6 +39,8 @@ src/
 └── contexts/ThemeContext.tsx tema light/dark (data-theme no <html> + localStorage)
 ```
 
+Headers: o `entry.server` gera um nonce por requisição e define CSP, HSTS e os demais headers do HTML (`src/config/security.ts`, `NonceContext` no `root.tsx`); o `netlify.toml` define cache e headers dos estáticos. Ver [`adr/0005-csp-nonce-no-ssr.md`](adr/0005-csp-nonce-no-ssr.md).
+
 Tema: variáveis CSS por `[data-theme]`, definidas por um script no `<head>` antes da pintura; ids do styled-components estáveis via `babel-plugin-styled-components`. Ver [`adr/0003-tema-por-variaveis-css.md`](adr/0003-tema-por-variaveis-css.md).
 
 Páginas seguem MVVM: a View (`Company.tsx`) só monta as seções; o ViewModel (`useCompany.ts`) resolve idioma, dados e itens do header. Ver [`adr/0002-estrutura-de-features.md`](adr/0002-estrutura-de-features.md).
@@ -61,5 +63,5 @@ Sem dados de usuário. Os pontos de atenção (headers, dependências, contas) e
 
 1. Gesto de toque do carrossel (swipe vertical rola, horizontal gira) conferido só no desktop; falta o aparelho real.
 2. Header no celular conferido em 390px (iframe) no plano 04; falta teste num aparelho real. Spec 0002.
-3. `yarn start` aponta para `build/server/index.js`, que o plugin da Netlify não gera. Spec 0003.
+3. Headers em produção (CSP, HSTS, cache dos estáticos) e regras do Cloudflare a conferir depois do deploy da spec 0003.
 4. Página da empresa carrega ~160 KB gzip de JS (React, styled-components, GSAP, router). Aceito por ora; reavaliar se as métricas do Search Console apontarem problema.

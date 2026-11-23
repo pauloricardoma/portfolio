@@ -40,7 +40,7 @@ yarn typecheck   # typegen + tsc
 yarn test        # Vitest (lógica pura, src/**/*.test.ts; config própria em vitest.config.ts)
 ```
 
-`yarn start` não funciona com o plugin da Netlify (ver spec 0003).
+`yarn start` serve o build (`build/server/server-build.js`, caminho do plugin da Netlify; pode mudar ao atualizá-lo). Com `NODE_ENV=production yarn start` dá para conferir a CSP localmente; os headers do `netlify.toml` só valem no deploy.
 
 ## Regras de trabalho
 
@@ -67,6 +67,7 @@ yarn test        # Vitest (lógica pura, src/**/*.test.ts; config própria em vi
 - `styled-components` e `gsap` precisam estar em `ssr.noExternal` no `vite.config.ts`, senão o SSR quebra.
 - O mesmo módulo de rota é usado nos dois idiomas com `id` diferente em `routes.ts`; o idioma vem da URL (`getLocaleFromPath`).
 - Ids das classes do styled-components vêm do `babel-plugin-styled-components` (`vite.config.ts`, só `src/`). Sem ele, o `/portfolio` diverge na hidratação, porque o servidor carrega todas as rotas e o cliente só uma (ADR 0003).
-- Nada que dependa do tema no render do React (SSR não sabe o tema): use CSS (`[data-theme]`, classes `only-light`/`only-dark`). Mudou o `themeScript.ts`? Recalcule o hash da CSP (spec 0003).
+- Nada que dependa do tema no render do React (SSR não sabe o tema): use CSS (`[data-theme]`, classes `only-light`/`only-dark`).
+- CSP com nonce por requisição (ADR 0005): todo `<script>` inline novo precisa de `nonce={useContext(NonceContext)}`, senão é bloqueado em produção (no dev não há CSP, então o erro só aparece no `yarn start`/deploy). Origem externa nova exige spec e mudança em `src/config/security.ts`. Headers do HTML ficam no `entry.server`; o `netlify.toml` só cuida dos estáticos.
 - Depois de criar componentes novos com o dev rodando, o HMR pode acusar hydration mismatch. Reinicie o `yarn dev` antes de investigar.
 - `.claude/` está no `.gitignore`: planos e settings não vão para o repositório.

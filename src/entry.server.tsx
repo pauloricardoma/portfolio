@@ -3,6 +3,8 @@ import { ServerRouter } from "react-router";
 import { renderToPipeableStream } from "react-dom/server";
 import { PassThrough } from "node:stream";
 import { ServerStyleSheet } from "styled-components";
+import { createNonce, securityHeaders } from "~/config/security";
+import { NonceContext } from "~/contexts/NonceContext";
 
 const handleRequest: HandleDocumentRequestFunction = (
   request,
@@ -10,14 +12,27 @@ const handleRequest: HandleDocumentRequestFunction = (
   responseHeaders,
   routerContext,
 ) => {
+  /**
+   * CSP com nonce por requisição (spec 0003, ADR 0005). Os headers entram
+   * ANTES do render, para valerem também em erro e timeout.
+   */
+  const nonce = createNonce();
+  const headers = securityHeaders(nonce, process.env.NODE_ENV === "production");
+  for (const [name, value] of Object.entries(headers)) responseHeaders.set(name, value);
+
   const sheet = new ServerStyleSheet();
 
   return new Promise<Response>((resolve, reject) => {
     const { pipe, abort } = renderToPipeableStream(
       sheet.collectStyles(
-        <ServerRouter context={routerContext} url={request.url} />
+        // O nonce vai a três lugares: scripts de dados do ServerRouter,
+        // scripts do React (opção nonce abaixo) e os do root.tsx (contexto)
+        <NonceContext.Provider value={nonce}>
+          <ServerRouter context={routerContext} url={request.url} nonce={nonce} />
+        </NonceContext.Provider>
       ),
       {
+        nonce,
         onAllReady() {
           const body = new PassThrough();
           let html = "";
@@ -58,6 +73,7 @@ const handleRequest: HandleDocumentRequestFunction = (
         },
         onError(error: unknown) {
           responseStatusCode = 500;
+          // Só o erro; o nonce nunca vai para log
           console.error(error);
         },
       }

@@ -39,7 +39,8 @@ Não há dados de usuários: sem formulário, login, banco, analytics nem cookie
 
 | Risco | Decisão | Spec / plano |
 | --- | --- | --- |
-| Sem headers de segurança (CSP, HSTS, X-Frame-Options) | Adicionar via `netlify.toml` | spec 0003 |
+| Sem headers de segurança (CSP, HSTS, X-Frame-Options) | Resolvido: CSP com nonce e headers do HTML no SSR (`entry.server`, `src/config/security.ts`); cache e headers dos estáticos no `netlify.toml` (ADR 0005) | spec 0003 |
+| `style-src 'unsafe-inline'` na CSP | Aceito (23/11/2026): o styled-components injeta `<style>` e há atributos `style`; sem entrada de usuário, o risco de injeção de estilo é baixo. Scripts seguem só com nonce | spec 0003 |
 | E-mail pessoal público no portfólio | Aceito: escolha do fundador, contato profissional | — |
 | Dependências desatualizadas | Revisar com `yarn audit` antes de cada mudança grande | — |
 
@@ -47,4 +48,6 @@ Não há dados de usuários: sem formulário, login, banco, analytics nem cookie
 
 - [ ] `yarn audit` sem vulnerabilidade alta ou crítica em dependência de runtime.
 - [ ] Nenhum dado pessoal novo coletado sem spec.
-- [ ] Headers de segurança conferidos em produção (depois da spec 0003).
+- [ ] Headers de segurança conferidos em produção: `curl -I https://prmacode.dev/` com CSP (nonce muda a cada chamada), um HSTS só, `Cache-Control: no-store` no HTML; `immutable` em `/assets/*`.
+- [ ] Cloudflare: sem "Cache Everything" no HTML; Rocket Loader, Zaraz, Web Analytics e Email Obfuscation desligados (injetam script ou reescrevem o HTML e quebram a CSP).
+- [ ] Script inline novo com o nonce (`NonceContext`); conferido com `NODE_ENV=production yarn start` sem violação de CSP no console.
