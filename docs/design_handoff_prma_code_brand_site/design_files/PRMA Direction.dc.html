@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="width:760px; background:#fafaf8; border-radius:16px; padding:28px; box-sizing:border-box; display:flex; flex-direction:column; gap:18px; font-family:Geist,Helvetica,sans-serif; color:#141413">
+  <div style="display:flex; align-items:center; gap:12px">
+    <span style="font:600 13px 'Geist Mono',monospace; background:#141413; color:#fafaf8; padding:4px 8px; border-radius:6px">{{ label }}</span>
+    <span style="font:600 18px Geist">{{ title }}</span>
+  </div>
+  <div style="font:400 15px/1.5 Geist; color:#55534e; text-wrap:pretty">{{ desc }}</div>
+
+  <div style="height:180px; background:#fff; border:1px solid #e4e2dd; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:20px">
+    <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 76 }}" ink="#141413" bg="#ffffff" accent="{{ accent }}" hint-size="76px,76px"></dc-import>
+    <span style="font:600 48px Geist; letter-spacing:-0.035em">PRMA <span style="font-weight:400">Code</span></span>
+  </div>
+  <div style="height:180px; background:#141413; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:20px">
+    <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 76 }}" ink="#fafaf8" bg="#141413" accent="{{ accent }}" hint-size="76px,76px"></dc-import>
+    <span style="font:600 48px Geist; letter-spacing:-0.035em; color:#fafaf8">PRMA <span style="font-weight:400">Code</span></span>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+    <div style="height:110px; background:#fff; border:1px solid #e4e2dd; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:12px; position:relative">
+      <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 44 }}" ink="#141413" bg="#ffffff" accent="#141413" hint-size="44px,44px"></dc-import>
+      <span style="font:600 26px Geist; letter-spacing:-0.035em">PRMA <span style="font-weight:400">Code</span></span>
+      <span style="position:absolute; left:12px; top:10px; font:500 11px 'Geist Mono',monospace; color:#8a8781">1 COR</span>
+    </div>
+    <div style="height:110px; background:var(--a); border-radius:12px; display:flex; align-items:center; justify-content:center; gap:12px; position:relative; --a:{{ accent }}">
+      <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 44 }}" ink="#141413" bg="{{ accent }}" accent="#fafaf8" hint-size="44px,44px"></dc-import>
+      <span style="font:600 26px Geist; letter-spacing:-0.035em">PRMA <span style="font-weight:400">Code</span></span>
+      <span style="position:absolute; left:12px; top:10px; font:500 11px 'Geist Mono',monospace; color:#141413">SOBRE COR</span>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:flex-end; gap:18px">
+    <div style="display:flex; flex-direction:column; gap:6px; align-items:center">
+      <div style="width:96px; height:96px; border-radius:22px; background:#141413; display:flex; align-items:center; justify-content:center">
+        <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 80 }}" boxed="{{ false }}" ink="#fafaf8" bg="#141413" accent="{{ accent }}" hint-size="80px,80px"></dc-import>
+      </div>
+      <span style="font:500 11px 'Geist Mono',monospace; color:#8a8781">APP</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px; align-items:center">
+      <div style="width:96px; height:96px; border-radius:50%; background:var(--a); display:flex; align-items:center; justify-content:center; --a:{{ accent }}">
+        <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 72 }}" boxed="{{ false }}" ink="#141413" bg="{{ accent }}" accent="#fafaf8" hint-size="72px,72px"></dc-import>
+      </div>
+      <span style="font:500 11px 'Geist Mono',monospace; color:#8a8781">AVATAR</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px; align-items:center">
+      <div style="display:flex; align-items:flex-end; gap:10px; height:96px">
+        <div style="width:32px; height:32px; border-radius:7px; background:#141413; display:flex; align-items:center; justify-content:center">
+          <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 28 }}" boxed="{{ false }}" ink="#fafaf8" bg="#141413" accent="{{ accent }}" hint-size="28px,28px"></dc-import>
+        </div>
+        <div style="width:16px; height:16px; border-radius:4px; background:#141413; display:flex; align-items:center; justify-content:center">
+          <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 15 }}" boxed="{{ false }}" ink="#fafaf8" bg="#141413" accent="{{ accent }}" hint-size="15px,15px"></dc-import>
+        </div>
+      </div>
+      <span style="font:500 11px 'Geist Mono',monospace; color:#8a8781">FAVICON</span>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:6px">
+      <div style="height:56px; border:1px solid #e4e2dd; border-radius:10px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 16px">
+        <span style="display:flex; align-items:center; gap:8px">
+          <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 28 }}" ink="#141413" bg="#ffffff" accent="{{ accent }}" hint-size="28px,28px"></dc-import>
+          <span style="font:600 16px Geist; letter-spacing:-0.03em">PRMA <span style="font-weight:400">Code</span></span>
+        </span>
+        <span style="display:flex; gap:12px; font:400 12px Geist; color:#6b6964"><span>Products</span><span>Services</span><span>Contact</span></span>
+      </div>
+      <span style="font:500 11px 'Geist Mono',monospace; color:#8a8781">HEADER</span>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:16px; align-items:flex-end">
+    <div style="display:flex; flex-direction:column; gap:6px">
+      <div style="width:372px; height:195px; background:#141413; border-radius:10px; padding:26px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between">
+        <span style="font:500 11px 'Geist Mono',monospace; color:#8a8781; letter-spacing:.06em">SOFTWARE STUDIO</span>
+        <span style="display:flex; align-items:center; gap:14px">
+          <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 52 }}" ink="#fafaf8" bg="#141413" accent="{{ accent }}" hint-size="52px,52px"></dc-import>
+          <span style="font:600 34px Geist; letter-spacing:-0.035em; color:#fafaf8">PRMA <span style="font-weight:400">Code</span></span>
+        </span>
+        <span style="font:400 12px Geist; color:#b9b6af">Produtos digitais e apps mobile &amp; web.</span>
+      </div>
+      <span style="font:500 11px 'Geist Mono',monospace; color:#8a8781">OG 1200×630</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px">
+      <div style="width:316px; height:180px; background:#fff; border:1px solid #e4e2dd; border-radius:6px; padding:20px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 1px 2px rgba(20,20,19,.06)">
+        <dc-import name="PRMA Mark" variant="{{ variant }}" size="{{ 34 }}" ink="#141413" bg="#ffffff" accent="{{ accent }}" hint-size="34px,34px"></dc-import>
+        <span style="display:flex; flex-direction:column; gap:3px">
+          <span style="font:600 14px Geist; letter-spacing:-0.01em">Paulo Ricardo Almeida</span>
+          <span style="font:400 11px Geist; color:#55534e">Founder · PRMA Code</span>
+          <span style="font:400 11px 'Geist Mono',monospace; color:#55534e">prmacode.dev</span>
+        </span>
+      </div>
+      <span style="font:500 11px 'Geist Mono',monospace; color:#8a8781">CARTÃO</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:1100},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pixel&quot;,&quot;cursor&quot;,&quot;play&quot;,&quot;grid&quot;],&quot;default&quot;:&quot;cursor&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;label&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;2a&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;desc&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#e8743b&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      variant: this.props.variant ?? "pixel",
+      label: this.props.label ?? "2a",
+      title: this.props.title ?? "",
+      desc: this.props.desc ?? "",
+      accent: this.props.accent ?? "#e8743b",
+    };
+  }
+}
+</script>
+</body>
+</html>

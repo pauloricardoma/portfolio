@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ecebe8;font-family:Geist,Helvetica,sans-serif;color:#141413}a{color:#141413}a:hover{color:#55534e}</style>
+</helmet>
+<section style="padding:64px 64px 0; display:flex; flex-direction:column; gap:32px">
+  <div style="display:flex; flex-direction:column; gap:8px; max-width:760px">
+    <div style="font:500 13px 'Geist Mono',monospace; color:#6b6964; text-transform:uppercase; letter-spacing:.08em">PRMA Code · Logo · Final</div>
+    <div style="font:600 40px Geist; letter-spacing:-0.03em">P com cursor</div>
+  </div>
+  <div id="final"><dc-import name="PRMA Direction" variant="cursor" label="Final" title="P com cursor" desc="O P do monograma seguido do cursor do terminal — a marca está sempre construindo algo." accent="{{ accent }}" hint-size="760px,1180px"></dc-import></div>
+</section>
+<section style="padding:64px 64px 0; display:flex; flex-direction:column; gap:32px">
+  <div style="display:flex; flex-direction:column; gap:8px; max-width:760px">
+    <div style="font:500 13px 'Geist Mono',monospace; color:#6b6964; text-transform:uppercase; letter-spacing:.08em">PRMA Code · Logo · Rodada 3</div>
+    <div style="font:600 40px Geist; letter-spacing:-0.03em">1b + 2d</div>
+    <div style="font:400 17px/1.5 Geist; color:#55534e; text-wrap:pretty">Duas fusões do monograma com cursor (1b) com a grade de módulos (2d). 3a traz o P e o cursor; 3b só o cursor, mais abstrato.</div>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; gap:32px; align-items:flex-start">
+    <div id="3a"><dc-import name="PRMA Direction" variant="pmod" label="3a" title="Monograma em módulos" desc="1b dentro da 2d: o P do monograma no primeiro módulo e o cursor no último — a grade lê como P_ ." accent="{{ accent }}" hint-size="760px,1180px"></dc-import></div>
+    <div id="3b"><dc-import name="PRMA Direction" variant="hybrid" label="3b" title="Módulos + cursor" desc="Grade da 2d com o cursor da 1b no quarto módulo — o produto que ainda está sendo construído." accent="{{ accent }}" hint-size="760px,1180px"></dc-import></div>
+  </div>
+</section>
+<section style="padding:64px 64px 0; display:flex; flex-direction:column; gap:32px">
+  <div style="display:flex; flex-direction:column; gap:8px; max-width:760px">
+    <div style="font:500 13px 'Geist Mono',monospace; color:#6b6964; text-transform:uppercase; letter-spacing:.08em">PRMA Code · Logo · Rodada 2</div>
+    <div style="font:600 40px Geist; letter-spacing:-0.03em">Símbolo + nome, com aplicações</div>
+    <div style="font:400 17px/1.5 Geist; color:#55534e; text-wrap:pretty">Técnico, minimalista, com um toque de games e referência sutil a código. Cada direção em claro, escuro, 1 cor, ícone de app, avatar, favicon, header, imagem OG e cartão. Escolha uma e sigo para o redesign do site (opcional).</div>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; gap:32px; align-items:flex-start">
+    <div id="2a"><dc-import name="PRMA Direction" variant="pixel" label="2a" title="P em pixels" desc="Um P desenhado em grade de pixels — estética de jogo retrô — com um pixel solto em destaque que lê como cursor piscando." accent="{{ accent }}" hint-size="760px,1180px"></dc-import></div>
+    <div id="2b"><dc-import name="PRMA Direction" variant="cursor" label="2b" title="P com cursor" desc="Evolução de 1b: o P seguido do cursor do terminal. A marca está sempre “digitando” — algo em construção." accent="{{ accent }}" hint-size="760px,1180px"></dc-import></div>
+    <div id="2c"><dc-import name="PRMA Direction" variant="play" label="2c" title="Play / prompt" desc="Um triângulo que é ao mesmo tempo botão de play (games, apps) e prompt de terminal ( >_ ). Duas leituras num só símbolo." accent="{{ accent }}" hint-size="760px,1180px"></dc-import></div>
+    <div id="2d"><dc-import name="PRMA Direction" variant="grid" label="2d" title="Módulos + botão" desc="Evolução de 1d sem letras: três módulos e um botão redondo, como um controle. Estúdio que monta produtos peça por peça." accent="{{ accent }}" hint-size="760px,1180px"></dc-import></div>
+  </div>
+</section>
+<section style="--accent: {{ accent }}; padding:64px; display:flex; flex-direction:column; gap:32px">
+  <div style="display:flex; flex-direction:column; gap:8px; max-width:720px">
+    <div style="font:500 13px 'Geist Mono',monospace; color:#6b6964; text-transform:uppercase; letter-spacing:.08em">PRMA Code · Logo · Rodada 1</div>
+    <div style="font:600 40px Geist; letter-spacing:-0.03em">Quatro direções</div>
+    <div style="font:400 17px/1.5 Geist; color:#55534e; text-wrap:pretty">Todas funcionam em uma cor (para o tema claro/escuro e a cor personalizável do site). A cor de destaque é ajustável em Tweaks.</div>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; gap:32px; align-items:flex-start">
+
+    <!-- 1a -->
+    <div id="1a" style="width:620px; background:#fafaf8; border-radius:16px; padding:28px; display:flex; flex-direction:column; gap:20px">
+      <div style="display:flex; align-items:center; gap:12px">
+        <span style="font:600 13px 'Geist Mono',monospace; background:#141413; color:#fafaf8; padding:4px 8px; border-radius:6px">1a</span>
+        <span style="font:600 18px Geist">Wordmark com ponto</span>
+      </div>
+      <div style="font:400 15px/1.5 Geist; color:#55534e">O nome lido como um domínio/namespace: prma.code. Direto, técnico, sem símbolo extra.</div>
+      <div style="height:200px; background:#ffffff; border:1px solid #e4e2dd; border-radius:12px; display:flex; align-items:center; justify-content:center">
+        <span style="font:700 64px Geist; letter-spacing:-0.05em; color:#141413">prma<span style="color:var(--accent)">.</span>code</span>
+      </div>
+      <div style="height:200px; background:#141413; border-radius:12px; display:flex; align-items:center; justify-content:center">
+        <span style="font:700 64px Geist; letter-spacing:-0.05em; color:#fafaf8">prma<span style="color:var(--accent)">.</span>code</span>
+      </div>
+      <div style="display:flex; align-items:flex-end; gap:20px">
+        <div style="width:96px; height:96px; border-radius:22px; background:#141413; display:flex; align-items:center; justify-content:center"><span style="font:700 58px Geist; letter-spacing:-0.06em; color:#fafaf8">p<span style="color:var(--accent)">.</span></span></div>
+        <div style="width:48px; height:48px; border-radius:11px; background:#141413; display:flex; align-items:center; justify-content:center"><span style="font:700 29px Geist; letter-spacing:-0.06em; color:#fafaf8">p<span style="color:var(--accent)">.</span></span></div>
+        <div style="width:24px; height:24px; border-radius:6px; background:#141413; display:flex; align-items:center; justify-content:center"><span style="font:700 15px Geist; letter-spacing:-0.06em; color:#fafaf8">p<span style="color:var(--accent)">.</span></span></div>
+        <div style="flex:1; height:56px; border:1px solid #e4e2dd; border-radius:10px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 18px">
+          <span style="font:700 20px Geist; letter-spacing:-0.05em">prma<span style="color:var(--accent)">.</span>code</span>
+          <span style="display:flex; gap:14px; font:400 13px Geist; color:#6b6964"><span>Products</span><span>Services</span><span>Contact</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1b -->
+    <div id="1b" style="width:620px; background:#fafaf8; border-radius:16px; padding:28px; display:flex; flex-direction:column; gap:20px">
+      <div style="display:flex; align-items:center; gap:12px">
+        <span style="font:600 13px 'Geist Mono',monospace; background:#141413; color:#fafaf8; padding:4px 8px; border-radius:6px">1b</span>
+        <span style="font:600 18px Geist">Monograma com cursor</span>
+      </div>
+      <div style="font:400 15px/1.5 Geist; color:#55534e">Um “P” num bloco, seguido do cursor do terminal: algo sempre sendo construído. Ótimo ícone de app.</div>
+      <div style="height:200px; background:#ffffff; border:1px solid #e4e2dd; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:20px">
+        <div style="width:76px; height:76px; border-radius:14px; background:#141413; display:flex; align-items:flex-end; justify-content:center; gap:4px; padding-bottom:14px; box-sizing:border-box"><span style="font:600 48px/1 'Geist Mono',monospace; color:#fafaf8">P</span><span style="width:16px; height:6px; background:var(--accent); margin-bottom:2px"></span></div>
+        <span style="font:600 48px Geist; letter-spacing:-0.035em; color:#141413">PRMA <span style="font-weight:400">Code</span></span>
+      </div>
+      <div style="height:200px; background:#141413; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:20px">
+        <div style="width:76px; height:76px; border-radius:14px; background:#fafaf8; display:flex; align-items:flex-end; justify-content:center; gap:4px; padding-bottom:14px; box-sizing:border-box"><span style="font:600 48px/1 'Geist Mono',monospace; color:#141413">P</span><span style="width:16px; height:6px; background:var(--accent); margin-bottom:2px"></span></div>
+        <span style="font:600 48px Geist; letter-spacing:-0.035em; color:#fafaf8">PRMA <span style="font-weight:400">Code</span></span>
+      </div>
+      <div style="display:flex; align-items:flex-end; gap:20px">
+        <div style="width:96px; height:96px; border-radius:22px; background:#141413; display:flex; align-items:flex-end; justify-content:center; gap:5px; padding-bottom:18px; box-sizing:border-box"><span style="font:600 60px/1 'Geist Mono',monospace; color:#fafaf8">P</span><span style="width:20px; height:8px; background:var(--accent); margin-bottom:3px"></span></div>
+        <div style="width:48px; height:48px; border-radius:11px; background:#141413; display:flex; align-items:flex-end; justify-content:center; gap:2px; padding-bottom:9px; box-sizing:border-box"><span style="font:600 30px/1 'Geist Mono',monospace; color:#fafaf8">P</span><span style="width:10px; height:4px; background:var(--accent); margin-bottom:2px"></span></div>
+        <div style="width:24px; height:24px; border-radius:6px; background:#141413; display:flex; align-items:flex-end; justify-content:center; gap:1px; padding-bottom:4px; box-sizing:border-box"><span style="font:600 16px/1 'Geist Mono',monospace; color:#fafaf8">P</span><span style="width:5px; height:2px; background:var(--accent); margin-bottom:1px"></span></div>
+        <div style="flex:1; height:56px; border:1px solid #e4e2dd; border-radius:10px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 18px">
+          <span style="display:flex; align-items:center; gap:8px"><span style="width:26px; height:26px; border-radius:6px; background:#141413; display:flex; align-items:flex-end; justify-content:center; gap:1px; padding-bottom:5px; box-sizing:border-box"><span style="font:600 16px/1 'Geist Mono',monospace; color:#fafaf8">P</span><span style="width:5px; height:2px; background:var(--accent); margin-bottom:1px"></span></span><span style="font:600 17px Geist; letter-spacing:-0.03em">PRMA <span style="font-weight:400">Code</span></span></span>
+          <span style="display:flex; gap:14px; font:400 13px Geist; color:#6b6964"><span>Products</span><span>Services</span><span>Contact</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1c -->
+    <div id="1c" style="width:620px; background:#fafaf8; border-radius:16px; padding:28px; display:flex; flex-direction:column; gap:20px">
+      <div style="display:flex; align-items:center; gap:12px">
+        <span style="font:600 13px 'Geist Mono',monospace; background:#141413; color:#fafaf8; padding:4px 8px; border-radius:6px">1c</span>
+        <span style="font:600 18px Geist">Chaves</span>
+      </div>
+      <div style="font:400 15px/1.5 Geist; color:#55534e">“pr” entre chaves — um bloco de código, as iniciais do fundador e da empresa. Referência a código explícita, porém discreta.</div>
+      <div style="height:200px; background:#ffffff; border:1px solid #e4e2dd; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:22px">
+        <span style="font:500 60px 'Geist Mono',monospace; letter-spacing:-0.06em; color:#141413"><span style="color:var(--accent)">{</span>pr<span style="color:var(--accent)">}</span></span>
+        <span style="width:1px; height:56px; background:#d8d6d0"></span>
+        <span style="display:flex; flex-direction:column; font:600 30px/1.05 Geist; letter-spacing:-0.03em; color:#141413"><span>PRMA</span><span style="font-weight:400">Code</span></span>
+      </div>
+      <div style="height:200px; background:#141413; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:22px">
+        <span style="font:500 60px 'Geist Mono',monospace; letter-spacing:-0.06em; color:#fafaf8"><span style="color:var(--accent)">{</span>pr<span style="color:var(--accent)">}</span></span>
+        <span style="width:1px; height:56px; background:#3a3936"></span>
+        <span style="display:flex; flex-direction:column; font:600 30px/1.05 Geist; letter-spacing:-0.03em; color:#fafaf8"><span>PRMA</span><span style="font-weight:400">Code</span></span>
+      </div>
+      <div style="display:flex; align-items:flex-end; gap:20px">
+        <div style="width:96px; height:96px; border-radius:22px; background:#141413; display:flex; align-items:center; justify-content:center"><span style="font:500 34px 'Geist Mono',monospace; letter-spacing:-0.08em; color:#fafaf8"><span style="color:var(--accent)">{</span>pr<span style="color:var(--accent)">}</span></span></div>
+        <div style="width:48px; height:48px; border-radius:11px; background:#141413; display:flex; align-items:center; justify-content:center"><span style="font:600 17px 'Geist Mono',monospace; letter-spacing:-0.08em; color:#fafaf8"><span style="color:var(--accent)">{</span>pr<span style="color:var(--accent)">}</span></span></div>
+        <div style="width:24px; height:24px; border-radius:6px; background:#141413; display:flex; align-items:center; justify-content:center"><span style="font:600 11px 'Geist Mono',monospace; letter-spacing:-0.1em; color:#fafaf8"><span style="color:var(--accent)">{</span>p<span style="color:var(--accent)">}</span></span></div>
+        <div style="flex:1; height:56px; border:1px solid #e4e2dd; border-radius:10px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 18px">
+          <span style="display:flex; align-items:center; gap:10px"><span style="font:500 19px 'Geist Mono',monospace; letter-spacing:-0.06em"><span style="color:var(--accent)">{</span>pr<span style="color:var(--accent)">}</span></span><span style="font:600 16px Geist; letter-spacing:-0.03em">PRMA <span style="font-weight:400">Code</span></span></span>
+          <span style="display:flex; gap:14px; font:400 13px Geist; color:#6b6964"><span>Products</span><span>Services</span><span>Contact</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1d -->
+    <div id="1d" style="width:620px; background:#fafaf8; border-radius:16px; padding:28px; display:flex; flex-direction:column; gap:20px">
+      <div style="display:flex; align-items:center; gap:12px">
+        <span style="font:600 13px 'Geist Mono',monospace; background:#141413; color:#fafaf8; padding:4px 8px; border-radius:6px">1d</span>
+        <span style="font:600 18px Geist">Grade de módulos</span>
+      </div>
+      <div style="font:400 15px/1.5 Geist; color:#55534e">As quatro letras como módulos de uma grade — um estúdio que monta produtos peça por peça. Um módulo em destaque marca o “produto próprio”.</div>
+      <div style="height:200px; background:#ffffff; border:1px solid #e4e2dd; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:22px">
+        <div style="display:grid; grid-template-columns:40px 40px; gap:4px">
+          <span style="height:40px; background:#141413; color:#fafaf8; border-radius:6px; display:flex; align-items:center; justify-content:center; font:600 22px 'Geist Mono',monospace">P</span>
+          <span style="height:40px; background:#141413; color:#fafaf8; border-radius:6px; display:flex; align-items:center; justify-content:center; font:600 22px 'Geist Mono',monospace">R</span>
+          <span style="height:40px; background:#141413; color:#fafaf8; border-radius:6px; display:flex; align-items:center; justify-content:center; font:600 22px 'Geist Mono',monospace">M</span>
+          <span style="height:40px; background:var(--accent); color:#141413; border-radius:6px; display:flex; align-items:center; justify-content:center; font:600 22px 'Geist Mono',monospace">A</span>
+        </div>
+        <span style="font:600 44px Geist; letter-spacing:-0.035em; color:#141413">PRMA <span style="font-weight:400">Code</span></span>
+      </div>
+      <div style="height:200px; background:#141413; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:22px">
+        <div style="display:grid; grid-template-columns:40px 40px; gap:4px">
+          <span style="height:40px; background:#fafaf8; color:#141413; border-radius:6px; display:flex; align-items:center; justify-content:center; font:600 22px 'Geist Mono',monospace">P</span>
+          <span style="height:40px; background:#fafaf8; color:#141413; border-radius:6px; display:flex; align-items:center; justify-content:center; font:600 22px 'Geist Mono',monospace">R</span>
+          <span style="height:40px; background:#fafaf8; color:#141413; border-radius:6px; display:flex; align-items:center; justify-content:center; font:600 22px 'Geist Mono',monospace">M</span>
+          <span style="height:40px; background:var(--accent); color:#141413; border-radius:6px; display:flex; align-items:center; justify-content:center; font:600 22px 'Geist Mono',monospace">A</span>
+        </div>
+        <span style="font:600 44px Geist; letter-spacing:-0.035em; color:#fafaf8">PRMA <span style="font-weight:400">Code</span></span>
+      </div>
+      <div style="display:flex; align-items:flex-end; gap:20px">
+        <div style="width:96px; height:96px; border-radius:22px; background:#141413; display:grid; grid-template-columns:30px 30px; grid-template-rows:30px 30px; gap:4px; place-content:center">
+          <span style="background:#fafaf8; color:#141413; border-radius:5px; display:flex; align-items:center; justify-content:center; font:600 17px 'Geist Mono',monospace">P</span>
+          <span style="background:#fafaf8; color:#141413; border-radius:5px; display:flex; align-items:center; justify-content:center; font:600 17px 'Geist Mono',monospace">R</span>
+          <span style="background:#fafaf8; color:#141413; border-radius:5px; display:flex; align-items:center; justify-content:center; font:600 17px 'Geist Mono',monospace">M</span>
+          <span style="background:var(--accent); color:#141413; border-radius:5px; display:flex; align-items:center; justify-content:center; font:600 17px 'Geist Mono',monospace">A</span>
+        </div>
+        <div style="width:48px; height:48px; border-radius:11px; background:#141413; display:grid; grid-template-columns:15px 15px; grid-template-rows:15px 15px; gap:2px; place-content:center">
+          <span style="background:#fafaf8; border-radius:3px"></span><span style="background:#fafaf8; border-radius:3px"></span><span style="background:#fafaf8; border-radius:3px"></span><span style="background:var(--accent); border-radius:3px"></span>
+        </div>
+        <div style="width:24px; height:24px; border-radius:6px; background:#141413; display:grid; grid-template-columns:7px 7px; grid-template-rows:7px 7px; gap:2px; place-content:center">
+          <span style="background:#fafaf8; border-radius:1px"></span><span style="background:#fafaf8; border-radius:1px"></span><span style="background:#fafaf8; border-radius:1px"></span><span style="background:var(--accent); border-radius:1px"></span>
+        </div>
+        <div style="flex:1; height:56px; border:1px solid #e4e2dd; border-radius:10px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 18px">
+          <span style="display:flex; align-items:center; gap:9px">
+            <span style="display:grid; grid-template-columns:10px 10px; grid-template-rows:10px 10px; gap:2px"><span style="background:#141413; border-radius:2px"></span><span style="background:#141413; border-radius:2px"></span><span style="background:#141413; border-radius:2px"></span><span style="background:var(--accent); border-radius:2px"></span></span>
+            <span style="font:600 17px Geist; letter-spacing:-0.03em">PRMA <span style="font-weight:400">Code</span></span>
+          </span>
+          <span style="display:flex; gap:14px; font:400 13px Geist; color:#6b6964"><span>Products</span><span>Services</span><span>Contact</span></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#e8743b&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#e8743b&quot;,&quot;#3fae6a&quot;,&quot;#6b5cf0&quot;,&quot;#2f8fe0&quot;]}}">
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? "#e8743b" };
+  }
+}
+</script>
+</body>
+</html>

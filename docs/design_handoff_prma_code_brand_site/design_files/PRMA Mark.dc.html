@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<span style="display:inline-block; position:relative; width:1em; height:1em; flex:none; font-size:{{ sizePx }}; --ink:{{ ink }}; --bg:{{ bg }}; --accent:{{ accent }}">
+  <sc-if value="{{ isPixel }}" hint-placeholder-val="{{ false }}">
+    <span style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(3,.18em); grid-template-rows:repeat(5,.18em); gap:.02em; place-content:center">
+      <sc-for list="{{ cells }}" as="c" hint-placeholder-count="15"><span style="background:{{ c }}; border-radius:.015em"></span></sc-for>
+    </span>
+  </sc-if>
+  <sc-if value="{{ isCursor }}" hint-placeholder-val="{{ false }}">
+    <span style="position:absolute; inset:0; background:{{ boxBg }}; border-radius:.22em; display:flex; align-items:flex-end; justify-content:center; gap:.05em; padding-bottom:.19em; box-sizing:border-box">
+      <span style="font-family:'Geist Mono',monospace; font-weight:600; font-size:.62em; line-height:1; color:{{ glyph }}">P</span>
+      <span style="width:.2em; height:.08em; background:var(--accent); margin-bottom:.03em"></span>
+    </span>
+  </sc-if>
+  <sc-if value="{{ isPlay }}" hint-placeholder-val="{{ false }}">
+    <span style="position:absolute; inset:0; background:{{ boxBg }}; border-radius:.22em; display:flex; align-items:center; justify-content:center; gap:.07em; padding-left:.06em; box-sizing:border-box">
+      <span style="width:.3em; height:.36em; background:{{ glyph }}; clip-path:polygon(0 0,100% 50%,0 100%)"></span>
+      <span style="width:.2em; height:.07em; background:var(--accent); transform:translateY(.145em)"></span>
+    </span>
+  </sc-if>
+  <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ false }}">
+    <span style="position:absolute; inset:0; display:grid; grid-template-columns:.4em .4em; grid-template-rows:.4em .4em; gap:.1em; place-content:center">
+      <span style="background:var(--ink); border-radius:.07em"></span>
+      <span style="background:var(--ink); border-radius:.07em"></span>
+      <span style="background:var(--ink); border-radius:.07em"></span>
+      <span style="background:var(--accent); border-radius:50%"></span>
+    </span>
+  </sc-if>
+  <sc-if value="{{ isPmod }}" hint-placeholder-val="{{ false }}">
+    <span style="position:absolute; inset:0; display:grid; grid-template-columns:.4em .4em; grid-template-rows:.4em .4em; gap:.1em; place-content:center">
+      <span style="background:var(--ink); border-radius:.07em; display:flex; align-items:center; justify-content:center; font-family:'Geist Mono',monospace; font-weight:600; font-size:.3em; line-height:1; color:var(--bg)">P</span>
+      <span style="background:var(--ink); border-radius:.07em"></span>
+      <span style="background:var(--ink); border-radius:.07em"></span>
+      <span style="display:flex; align-items:flex-end"><span style="width:100%; height:.13em; background:var(--accent); border-radius:.03em"></span></span>
+    </span>
+  </sc-if>
+  <sc-if value="{{ isHybrid }}" hint-placeholder-val="{{ false }}">
+    <span style="position:absolute; inset:0; display:grid; grid-template-columns:.4em .4em; grid-template-rows:.4em .4em; gap:.1em; place-content:center">
+      <span style="background:var(--ink); border-radius:.07em"></span>
+      <span style="background:var(--ink); border-radius:.07em"></span>
+      <span style="background:var(--ink); border-radius:.07em"></span>
+      <span style="display:flex; align-items:flex-end"><span style="width:100%; height:.13em; background:var(--accent); border-radius:.03em"></span></span>
+    </span>
+  </sc-if>
+</span>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:160,&quot;height&quot;:160},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pixel&quot;,&quot;cursor&quot;,&quot;play&quot;,&quot;grid&quot;,&quot;hybrid&quot;],&quot;default&quot;:&quot;cursor&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:64,&quot;tsType&quot;:&quot;number&quot;},&quot;boxed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;ink&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#141413&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;bg&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ffffff&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#e8743b&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const v = this.props.variant ?? "pixel";
+    const boxed = this.props.boxed ?? true;
+    const I = "var(--ink)", N = "transparent", A = "var(--accent)";
+    return {
+      sizePx: (this.props.size ?? 64) + "px",
+      ink: this.props.ink ?? "#141413",
+      bg: this.props.bg ?? "#ffffff",
+      accent: this.props.accent ?? "#e8743b",
+      isPixel: v === "pixel", isCursor: v === "cursor", isPlay: v === "play", isGrid: v === "grid", isHybrid: v === "hybrid", isPmod: v === "pmod",
+      cells: [I,I,I, I,N,I, I,I,I, I,N,N, I,N,A],
+      boxBg: boxed ? "var(--ink)" : "transparent",
+      glyph: boxed ? "var(--bg)" : "var(--ink)",
+    };
+  }
+}
+</script>
+</body>
+</html>
