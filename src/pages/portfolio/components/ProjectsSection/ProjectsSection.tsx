@@ -1,188 +1,79 @@
 /**
- * ProjectsSection.tsx — Seção completa de projetos.
+ * ProjectsSection.tsx — "01 / Projects": palco 3D, controles e detalhes.
  *
- * Combina:
- * - Título com animação de scroll (GSAP ScrollTrigger)
- * - Cena 3D com o carrossel orbital (React Three Fiber)
- * - Card de descrição do projeto em foco
- * - Navegação por dots e setas
- *
- * CONCEITO IMPORTANTE: Suspense + lazy loading
- *
- * Componentes 3D são pesados (Three.js é ~600KB).
- * useTexture do drei usa Suspense pra carregar texturas.
- * O <Suspense> do React mostra um fallback enquanto carrega.
- *
- * Isso evita que a página inteira trave esperando os assets 3D.
+ * A seção sai no SSR; só a cena Three.js dentro do palco é lazy
+ * (ver ProjectsStage). O projeto ativo mora no usePortfolio.
  */
-import { Suspense, useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Section from "~/components/UI/Section/Section";
-import Container from "~/components/UI/Container/Container";
-import Text from "~/components/UI/Text/Text";
-import Scene from "~/components/3D/Scene";
-import ProjectsCarousel from "./ProjectsCarousel";
-import ProjectDescription from "./ProjectDescription";
-import {
-  ProjectsSectionWrapper,
-  CanvasContainer,
-  DotsNav,
-  Dot,
-  NavArrows,
-  NavArrow,
-} from "./styles";
-import type { IProject } from "~/interfaces/portfolio/IProject";
-import useIsMobile from "~/hooks/useIsMobile";
+import { useReveal } from "~/hooks/useReveal";
 import type { IDictionary } from "~/i18n/types";
-
-gsap.registerPlugin(ScrollTrigger);
+import type { IProject } from "~/interfaces/portfolio/IProject";
+import CarouselControls from "./CarouselControls";
+import ProjectsStage from "./ProjectsStage";
+import ProjectDetails from "./ProjectDetails";
+import {
+  SectionWrapper,
+  SectionInner,
+  TopRow,
+  Heading,
+  Index,
+  Title,
+  DetailsList,
+} from "./styles";
 
 interface ProjectsSectionProps {
+  index: string;
   texts: IDictionary["portfolio"]["projects"];
   projects: IProject[];
-  focusedIndex: number;
-  onFocusChange: (index: number) => void;
+  activeIndex: number;
+  onSelect: (index: number) => void;
+  onPrev: () => void;
+  onNext: () => void;
 }
 
 export default function ProjectsSection({
+  index,
   texts,
   projects,
-  focusedIndex,
-  onFocusChange,
+  activeIndex,
+  onSelect,
+  onPrev,
+  onNext,
 }: ProjectsSectionProps) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
-
-  /**
-   * Animação de entrada da seção inteira via ScrollTrigger.
-   *
-   * ".projects-title": título entra com fade + slide up.
-   * ".projects-canvas": o canvas 3D entra com fade + scale.
-   * ".projects-info": descrição e navegação entram por último.
-   *
-   * stagger entre eles cria um efeito cascata suave.
-   */
-  /**
-   * Animações individuais com ScrollTrigger próprio.
-   * Evita o bug de gsap.from + timeline ScrollTrigger que
-   * seta opacity:0 prematuramente.
-   *
-   * toggleActions: "play none none reverse"
-   * → play ao entrar, reverse ao sair por cima (restaura estado)
-   */
-  useGSAP(
-    () => {
-      gsap.fromTo(".projects-title",
-        { y: 30, autoAlpha: 0 },
-        {
-          y: 0, autoAlpha: 1, duration: 0.6, ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".projects-title",
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-        },
-      );
-
-      gsap.fromTo(".projects-canvas",
-        { autoAlpha: 0 },
-        {
-          autoAlpha: 1, duration: 0.8, ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".projects-canvas",
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-        },
-      );
-
-      gsap.fromTo(".projects-info",
-        { y: 20, autoAlpha: 0 },
-        {
-          y: 0, autoAlpha: 1, duration: 0.6, ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".projects-info",
-            start: "top 90%",
-            toggleActions: "play none none reverse",
-          },
-        },
-      );
-    },
-    { scope: sectionRef }
-  );
-
-  const goNext = () => {
-    onFocusChange((focusedIndex + 1) % projects.length);
-  };
-
-  const goPrev = () => {
-    onFocusChange(
-      (focusedIndex - 1 + projects.length) % projects.length
-    );
-  };
+  const ref = useReveal<HTMLElement>();
 
   return (
-    <Section id="projects">
-      <ProjectsSectionWrapper ref={sectionRef}>
-        <Container>
-          <Text
-            variant="h1"
-            align="center"
-            className="projects-title"
-            style={{ marginBottom: 32 }}
-          >
-            {texts.title}
-          </Text>
-        </Container>
+    <SectionWrapper id="projects" ref={ref} aria-labelledby="projects-title">
+      <SectionInner>
+        <TopRow className="reveal">
+          <Heading>
+            <Index>
+              {index} / {texts.label}
+            </Index>
+            <Title id="projects-title">{texts.title}</Title>
+          </Heading>
+          <CarouselControls
+            texts={texts}
+            activeIndex={activeIndex}
+            total={projects.length}
+            onPrev={onPrev}
+            onNext={onNext}
+          />
+        </TopRow>
 
-        <CanvasContainer className="projects-canvas">
-          {/**
-           * Suspense: enquanto as texturas (screenshots) estão carregando,
-           * mostra null (nada). Poderia ser um spinner/skeleton.
-           * Quando tudo carrega, renderiza a cena completa.
-           */}
-          <Suspense fallback={null}>
-            <Scene>
-              <ProjectsCarousel
-                projects={projects}
-                focusedIndex={focusedIndex}
-                onFocusChange={onFocusChange}
-                dragEnabled={!isMobile}
-                orbitRadius={isMobile ? 3.8 : 3.2}
-                laptopScale={isMobile ? 1.0 : 1.3}
-              />
-            </Scene>
-          </Suspense>
-        </CanvasContainer>
+        <ProjectsStage
+          className="reveal"
+          texts={texts}
+          projects={projects}
+          activeIndex={activeIndex}
+          onSelect={onSelect}
+          onPrev={onPrev}
+          onNext={onNext}
+        />
 
-        <Container>
-          <div className="projects-info">
-            <ProjectDescription project={projects[focusedIndex]} />
-
-            <DotsNav>
-              {projects.map((project, i) => (
-                <Dot
-                  key={project.id}
-                  $active={i === focusedIndex}
-                  onClick={() => onFocusChange(i)}
-                  aria-label={texts.view(project.name)}
-                />
-              ))}
-            </DotsNav>
-
-            <NavArrows>
-              <NavArrow onClick={goPrev} aria-label={texts.previous}>
-                ←
-              </NavArrow>
-              <NavArrow onClick={goNext} aria-label={texts.next}>
-                →
-              </NavArrow>
-            </NavArrows>
-          </div>
-        </Container>
-      </ProjectsSectionWrapper>
-    </Section>
+        <DetailsList className="reveal">
+          <ProjectDetails texts={texts} project={projects[activeIndex]} index={activeIndex} />
+        </DetailsList>
+      </SectionInner>
+    </SectionWrapper>
   );
 }

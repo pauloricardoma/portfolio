@@ -23,6 +23,7 @@ const pt: IDictionary = {
     toggleTheme: "Mudar tema",
     themeLight: "Claro",
     themeDark: "Escuro",
+    companySite: "PRMA Code ↗",
   },
   company: {
     hero: {
@@ -65,25 +66,44 @@ const pt: IDictionary = {
   },
   portfolio: {
     hero: {
-      title: "Software Engineer",
+      eyebrow: (name) => `${name} · Fundador, PRMA Code`,
+      titleStart: "Software",
+      titleEnd: "Engineer",
       subtitle:
         "Especialista em construção de aplicações web e mobile de alta complexidade com React, TypeScript e Node.js — do desenho da solução à entrega em produção.",
-      scroll: "Scroll",
+      ctaProjects: "Ver projetos ↓",
+      ctaContact: "Entre em contato",
     },
     projects: {
-      title: "Projetos",
-      view: (name) => `Ver projeto ${name}`,
+      label: "Projetos",
+      title: "Trabalhos selecionados",
+      counter: (current, total) =>
+        `${String(current).padStart(2, "0")} / ${String(total).padStart(2, "0")}`,
+      carouselLabel: "Projetos",
+      carouselRole: "carrossel",
+      goTo: (name) => `Ir para o projeto ${name}`,
       previous: "Projeto anterior",
       next: "Próximo projeto",
+      metricsLabel: "Resultados",
+      platform: {
+        web: "Web",
+        mobile: "iOS · Android",
+      },
+      screenshotAlt: (name) => `Captura de tela de ${name}`,
     },
     skills: {
-      title: "Skills",
+      label: "Skills",
+      title: "Stack",
     },
     contact: {
+      label: "Contato",
       title: "Vamos conversar?",
       subtitle:
         "Estou sempre aberto a novos desafios e oportunidades. Entre em contato por qualquer um dos canais abaixo.",
-      madeWith: "Feito com React, Three.js & GSAP",
+      email: "E-mail",
+    },
+    footer: {
+      profileOf: "Um perfil da PRMA Code",
     },
   },
   errors: {

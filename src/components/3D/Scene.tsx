@@ -33,13 +33,27 @@
  */
 import { Canvas } from "@react-three/fiber";
 import type { ReactNode } from "react";
+import type { ThemeMode } from "~/styles/tokens";
 
 interface SceneProps {
   children: ReactNode;
   className?: string;
+  /** O fundo do palco muda com o tema; a luz acompanha para os aparelhos não sumirem */
+  themeMode: ThemeMode;
 }
 
-export default function Scene({ children, className }: SceneProps) {
+/**
+ * Luz por tema: no claro, o fundo branco faz o grafite parecer um recorte preto,
+ * então a cena recebe mais luz ambiente e um key light mais forte.
+ */
+const LIGHTS: Record<ThemeMode, { ambient: number; key: number; fill: number }> = {
+  light: { ambient: 1.1, key: 1.6, fill: 0.8 },
+  dark: { ambient: 0.6, key: 1, fill: 0.4 },
+};
+
+export default function Scene({ children, className, themeMode }: SceneProps) {
+  const lights = LIGHTS[themeMode];
+
   return (
     <Canvas
       className={className}
@@ -77,21 +91,21 @@ export default function Scene({ children, className }: SceneProps) {
        * Sem ela, as faces não voltadas pra luz ficariam 100% pretas.
        * intensity 0.6 = suave, não "achata" as sombras.
        */}
-      <ambientLight intensity={0.6} />
+      <ambientLight intensity={lights.ambient} />
 
       {/**
        * pointLight: luz pontual em [5, 5, 5] (canto superior direito frontal).
        * Cria sombras e highlights que dão volume aos objetos.
        * intensity 1 = intensidade normal.
        */}
-      <pointLight position={[5, 5, 5]} intensity={1} />
+      <pointLight position={[5, 5, 5]} intensity={lights.key} />
 
       {/**
        * Segunda luz do lado oposto [-3, -2, 4] (canto inferior esquerdo).
        * "Fill light" — suaviza as sombras do lado oposto à luz principal.
        * intensity 0.4 = bem fraca, só pra não ficar 100% escuro.
        */}
-      <pointLight position={[-3, -2, 4]} intensity={0.4} />
+      <pointLight position={[-3, -2, 4]} intensity={lights.fill} />
 
       {children}
     </Canvas>

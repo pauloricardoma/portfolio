@@ -1,32 +1,20 @@
 import { useState, useCallback, useMemo } from "react";
-import type { IProject } from "~/interfaces/portfolio/IProject";
-import type { ISkillCategory } from "./components/SkillsSection/SkillCategory";
+import type { IProject, IProjectData, MaybeLocalized } from "~/interfaces/portfolio/IProject";
+import type { ISkillCategory, ISkillCategoryData } from "~/interfaces/portfolio/ISkillCategory";
+import type { IContactLink } from "~/interfaces/portfolio/IContactLink";
 import type { INavItem } from "~/interfaces/shell/INavItem";
-import type { Locale, Localized } from "~/i18n/types";
+import type { Locale } from "~/i18n/types";
 import { useLocale } from "~/hooks/useLocale";
 import { COMPANY } from "~/config/company";
-
-/** Texto igual nos dois idiomas, ou { en, pt } quando muda */
-type MaybeLocalized = string | Localized<string>;
-
-type LocalizedProject = Omit<IProject, "description" | "techs"> & {
-  description: Localized<string>;
-  techs: MaybeLocalized[];
-};
-
-
-type LocalizedSkillCategory = Omit<ISkillCategory, "name" | "skills"> & {
-  name: MaybeLocalized;
-  skills: MaybeLocalized[];
-};
 
 const resolve = (value: MaybeLocalized, locale: Locale) =>
   typeof value === "string" ? value : value[locale];
 
-const projects: LocalizedProject[] = [
+const projects: IProjectData[] = [
   {
     id: "coordly",
     name: "Coordly",
+    kind: { en: "SaaS management platform", pt: "Plataforma SaaS de gestão" },
     description: {
       en: "SaaS management platform rendering 400k+ items. I fixed critical performance bottlenecks with virtualization and memoization, cutting memory usage by roughly 50%. I also migrated the architecture from Redux to React Query and built an internal component for the Autodesk 3D Viewer.",
       pt: "Plataforma SaaS de gestão com +400k itens renderizados. Resolvi gargalos críticos de performance com virtualização e memoização, reduzi ~50% do consumo de memória. Migrei arquitetura de Redux para React Query e desenvolvi componente interno para Autodesk Viewer 3D.",
@@ -34,10 +22,21 @@ const projects: LocalizedProject[] = [
     techs: ["React", "TypeScript", "Styled Components", "React Query", "Redux", "Autodesk Viewer 3D"],
     type: "web",
     screenshot: "/projects/webapp.png",
+    metrics: [
+      {
+        value: { en: "400k+", pt: "+400k" },
+        label: { en: "items rendered", pt: "itens renderizados" },
+      },
+      {
+        value: { en: "~50%", pt: "~50%" },
+        label: { en: "less memory usage", pt: "menos consumo de memória" },
+      },
+    ],
   },
   {
     id: "la-fabrique",
     name: "La Fabrique Flottante",
+    kind: { en: "International mobile app", pt: "App mobile internacional" },
     description: {
       en: "International mobile app with real-time chat, native Android/iOS modules and Firebase microservices. I diagnosed and fixed critical Android performance issues, built a scalable chat system and wrote native modules for features the React Native ecosystem didn't offer.",
       pt: "App mobile internacional com chat realtime, módulos nativos Android/iOS e microsserviços Firebase. Diagnostiquei e corrigi gargalos críticos de performance no Android, desenvolvi sistema de chat escalável e módulos nativos para funcionalidades inexistentes no ecossistema React Native.",
@@ -49,6 +48,7 @@ const projects: LocalizedProject[] = [
   {
     id: "codemobile",
     name: "Codemobile",
+    kind: { en: "Full-stack and mobile projects", pt: "Projetos fullstack e mobile" },
     description: {
       en: "Several full-stack and mobile projects: REST APIs with NestJS, serverless backends on Firebase Functions, Stripe payment integration, a native Android module for SIM-based calls and continuous releases to the app stores.",
       pt: "Múltiplos projetos fullstack e mobile: APIs REST com NestJS, serverless com Firebase Functions, integração de pagamentos Stripe, módulo nativo Android para chamadas SIM e publicação contínua nas stores.",
@@ -59,11 +59,9 @@ const projects: LocalizedProject[] = [
   },
 ];
 
-const skillCategories: LocalizedSkillCategory[] = [
+const skillCategories: ISkillCategoryData[] = [
   {
     name: "Frontend",
-    icon: "⚛️",
-    proficiency: 95,
     skills: [
       "React",
       "TypeScript",
@@ -77,8 +75,6 @@ const skillCategories: LocalizedSkillCategory[] = [
   },
   {
     name: "Mobile",
-    icon: "📱",
-    proficiency: 90,
     skills: [
       "React Native",
       "Kotlin",
@@ -91,8 +87,6 @@ const skillCategories: LocalizedSkillCategory[] = [
   },
   {
     name: "Backend",
-    icon: "🔧",
-    proficiency: 80,
     skills: [
       "Node.js",
       "NestJS",
@@ -106,8 +100,6 @@ const skillCategories: LocalizedSkillCategory[] = [
   },
   {
     name: { en: "3D & Animation", pt: "3D & Animação" },
-    icon: "🎨",
-    proficiency: 70,
     skills: [
       "Three.js",
       "React Three Fiber",
@@ -119,21 +111,17 @@ const skillCategories: LocalizedSkillCategory[] = [
   },
   {
     name: { en: "Architecture", pt: "Arquitetura" },
-    icon: "🏗️",
-    proficiency: 85,
     skills: [
       "Design Patterns",
       { en: "Microservices", pt: "Microsserviços" },
       { en: "Legacy Refactoring", pt: "Refatoração Legados" },
       "Performance",
-      "Virtualização",
+      { en: "Virtualization", pt: "Virtualização" },
       "Code Review",
     ],
   },
   {
     name: { en: "Integrations", pt: "Integrações" },
-    icon: "🔗",
-    proficiency: 80,
     skills: [
       "Stripe",
       "Firebase Auth",
@@ -145,38 +133,35 @@ const skillCategories: LocalizedSkillCategory[] = [
   },
 ];
 
-const contactLinks = [
-  {
-    label: "Email",
-    href: "mailto:pauloricardo.m.almeida@gmail.com",
-    icon: "✉️",
-  },
-  {
-    label: "GitHub",
-    href: COMPANY.founder.github,
-    icon: "🐙",
-  },
-  {
-    label: "LinkedIn",
-    href: COMPANY.founder.linkedin,
-    icon: "💼",
-  },
-];
+const FOUNDER_EMAIL = "pauloricardo.m.almeida@gmail.com";
 
 export function usePortfolio() {
   const { locale, t } = useLocale();
-  const [focusedProjectIndex, setFocusedProjectIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const total = projects.length;
 
-  const handleFocusChange = useCallback((index: number) => {
-    setFocusedProjectIndex(index);
-  }, []);
+  /** Qualquer índice (inclusive negativo) vira um projeto válido: loop módulo n */
+  const goTo = useCallback(
+    (index: number) => setActiveIndex(((index % total) + total) % total),
+    [total]
+  );
+  const goNext = useCallback(() => setActiveIndex((i) => (i + 1) % total), [total]);
+  const goPrev = useCallback(() => setActiveIndex((i) => (i - 1 + total) % total), [total]);
 
   const localizedProjects: IProject[] = useMemo(
     () =>
       projects.map((project) => ({
-        ...project,
+        id: project.id,
+        name: project.name,
+        kind: project.kind[locale],
         description: project.description[locale],
         techs: project.techs.map((tech) => resolve(tech, locale)),
+        type: project.type,
+        screenshot: project.screenshot,
+        metrics: (project.metrics ?? []).map((metric) => ({
+          value: metric.value[locale],
+          label: metric.label[locale],
+        })),
       })),
     [locale]
   );
@@ -184,7 +169,6 @@ export function usePortfolio() {
   const localizedSkills: ISkillCategory[] = useMemo(
     () =>
       skillCategories.map((category) => ({
-        ...category,
         name: resolve(category.name, locale),
         skills: category.skills.map((skill) => resolve(skill, locale)),
       })),
@@ -196,7 +180,16 @@ export function usePortfolio() {
       { label: t.header.projects, href: "#projects", kind: "anchor" },
       { label: t.header.skills, href: "#skills", kind: "anchor" },
       { label: t.header.contact, href: "#contact", kind: "anchor" },
-      { label: "PRMA Code", href: "/", kind: "route" },
+      { label: t.header.companySite, href: "/", kind: "route" },
+    ],
+    [t]
+  );
+
+  const contactLinks: IContactLink[] = useMemo(
+    () => [
+      { label: t.portfolio.contact.email, href: `mailto:${FOUNDER_EMAIL}`, external: false },
+      { label: "GitHub", href: COMPANY.founder.github, external: true },
+      { label: "LinkedIn", href: COMPANY.founder.linkedin, external: true },
     ],
     [t]
   );
@@ -206,9 +199,15 @@ export function usePortfolio() {
     founderName: COMPANY.founder.name,
     navItems,
     projects: localizedProjects,
-    focusedProjectIndex,
-    handleFocusChange,
+    activeIndex,
+    goTo,
+    goNext,
+    goPrev,
     skillCategories: localizedSkills,
     contactLinks,
+    footer: {
+      left: `${COMPANY.founder.name} © ${new Date().getFullYear()}`,
+      right: t.portfolio.footer.profileOf,
+    },
   };
 }

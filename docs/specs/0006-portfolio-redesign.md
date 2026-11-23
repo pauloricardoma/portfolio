@@ -1,6 +1,6 @@
 # Spec 0006 — Identidade visual: redesign do /portfolio
 
-- **Status:** planejada
+- **Status:** concluída
 - **Pedido original:** "Beleza, começa no docs/design_handoff_prma_code_brand_site/README.md" + "queria que a gente melhorasse o que temos [no carrossel], mais detalhado, mais fluido, pra mostrar expertise com 3D também. bora com uma feature nova pra isso"
 - **Data:** 23/11/2026
 - **Planos:** 05

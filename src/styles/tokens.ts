@@ -41,40 +41,6 @@ export const fonts = {
   mono: "'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace",
 } as const;
 
-export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
-  xxxl: 64,
-} as const;
-
-export const fontSize = {
-  xs: 12,
-  sm: 14,
-  md: 16,
-  lg: 20,
-  xl: 24,
-  xxl: 32,
-  display: 48,
-  hero: 64,
-} as const;
-
-export const fontWeight = {
-  regular: 400,
-  medium: 500,
-  semibold: 600,
-  bold: 700,
-} as const;
-
-export const lineHeight = {
-  tight: 1.2,
-  normal: 1.5,
-  relaxed: 1.75,
-} as const;
-
 /** Escala tipográfica do handoff */
 export const type = {
   heroTitle: "600 clamp(64px, 13vw, 168px)/0.9",

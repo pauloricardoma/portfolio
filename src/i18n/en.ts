@@ -23,6 +23,7 @@ const en: IDictionary = {
     toggleTheme: "Switch theme",
     themeLight: "Light",
     themeDark: "Dark",
+    companySite: "PRMA Code ↗",
   },
   company: {
     hero: {
@@ -65,25 +66,44 @@ const en: IDictionary = {
   },
   portfolio: {
     hero: {
-      title: "Software Engineer",
+      eyebrow: (name) => `${name} · Founder, PRMA Code`,
+      titleStart: "Software",
+      titleEnd: "Engineer",
       subtitle:
         "Specialized in building complex web and mobile applications with React, TypeScript and Node.js, from solution design all the way to production.",
-      scroll: "Scroll",
+      ctaProjects: "See projects ↓",
+      ctaContact: "Get in touch",
     },
     projects: {
-      title: "Projects",
-      view: (name) => `View project ${name}`,
+      label: "Projects",
+      title: "Selected work",
+      counter: (current, total) =>
+        `${String(current).padStart(2, "0")} / ${String(total).padStart(2, "0")}`,
+      carouselLabel: "Projects",
+      carouselRole: "carousel",
+      goTo: (name) => `Go to project ${name}`,
       previous: "Previous project",
       next: "Next project",
+      metricsLabel: "Results",
+      platform: {
+        web: "Web",
+        mobile: "iOS · Android",
+      },
+      screenshotAlt: (name) => `Screenshot of ${name}`,
     },
     skills: {
-      title: "Skills",
+      label: "Skills",
+      title: "Stack",
     },
     contact: {
+      label: "Contact",
       title: "Let's talk",
       subtitle:
         "I'm always open to new challenges and opportunities. Reach out through any of the channels below.",
-      madeWith: "Built with React, Three.js & GSAP",
+      email: "Email",
+    },
+    footer: {
+      profileOf: "A PRMA Code profile",
     },
   },
   errors: {

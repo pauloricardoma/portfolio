@@ -26,6 +26,8 @@ export interface IDictionary {
     themeLight: string;
     /** Rótulo do botão quando o tema atual é claro (ação: ir para o escuro) */
     themeDark: string;
+    /** Link do portfólio para a home da empresa ("PRMA Code ↗") */
+    companySite: string;
   };
   company: {
     hero: {
@@ -68,23 +70,49 @@ export interface IDictionary {
   };
   portfolio: {
     hero: {
-      title: string;
+      /** "Paulo Ricardo Almeida · Founder, PRMA Code" */
+      eyebrow: (name: string) => string;
+      /** H1 em duas partes: a segunda sai em peso 400, seguida do cursor */
+      titleStart: string;
+      titleEnd: string;
       subtitle: string;
-      scroll: string;
+      ctaProjects: string;
+      ctaContact: string;
     };
     projects: {
+      label: string;
       title: string;
-      view: (name: string) => string;
+      /** "01 / 03" */
+      counter: (current: number, total: number) => string;
+      /** aria-label do palco */
+      carouselLabel: string;
+      /** aria-roledescription do palco */
+      carouselRole: string;
+      /** aria-label do dot e do aparelho */
+      goTo: (name: string) => string;
       previous: string;
       next: string;
+      /** aria-label da lista de métricas */
+      metricsLabel: string;
+      platform: {
+        web: string;
+        mobile: string;
+      };
+      /** alt da screenshot quando o 3D não roda */
+      screenshotAlt: (name: string) => string;
     };
     skills: {
+      label: string;
       title: string;
     };
     contact: {
+      label: string;
       title: string;
       subtitle: string;
-      madeWith: string;
+      email: string;
+    };
+    footer: {
+      profileOf: string;
     };
   };
   errors: {

@@ -24,14 +24,14 @@ src/
 │   └── portfolio/            Portfolio.tsx, usePortfolio.ts, components/{HeroSection, ProjectsSection,
 │                             SkillsSection, ContactSection}
 ├── components/
-│   ├── UI/                   Text, Button, Chip, UnderlineLink, SplitSection, Container, Section
+│   ├── UI/                   Button, Chip, UnderlineLink, SplitSection
 │   ├── Brand/                LogoMark (marca "P com cursor"), Cursor (cursor piscando)
-│   ├── 3D/                   Scene, DevicePhone, DeviceLaptop, LaptopKeyboard
+│   ├── 3D/                   Scene (luz por tema), DevicePhone, DeviceLaptop, LaptopKeyboard, WebGLBoundary
 │   └── Shell/                Header (recebe navItems da page), LanguageToggle, Footer
 ├── i18n/                     types.ts (IDictionary, Locale, Localized), en.ts, pt.ts, locale.ts
 ├── config/                   company.ts, products.ts
 ├── seo/buildMeta.ts          metas, OG, hreflang, JSON-LD (Organization, Person)
-├── hooks/                    useLocale, useReveal, useIsMobile
+├── hooks/                    useLocale, useReveal, useIsMobile, useReducedMotion, useWebGLSupport
 ├── interfaces/               company/, portfolio/, shell/
 ├── styles/                   tokens.ts (hex), themes/theme.ts (var(--…)), global.ts, themeScript.ts
 └── contexts/ThemeContext.tsx tema light/dark (data-theme no <html> + localStorage)
@@ -40,6 +40,8 @@ src/
 Tema: variáveis CSS por `[data-theme]`, definidas por um script no `<head>` antes da pintura; ids do styled-components estáveis via `babel-plugin-styled-components`. Ver [`adr/0003-tema-por-variaveis-css.md`](adr/0003-tema-por-variaveis-css.md).
 
 Páginas seguem MVVM: a View (`Company.tsx`) só monta as seções; o ViewModel (`useCompany.ts`) resolve idioma, dados e itens do header. Ver [`adr/0002-estrutura-de-features.md`](adr/0002-estrutura-de-features.md).
+
+Carrossel do portfólio: a seção de projetos sai no SSR (palco, contador, setas, dots e detalhes). Só a cena Three.js (`ProjectsScene`) é `lazy()` e só monta se `useWebGLSupport` achar WebGL; um `WebGLBoundary` em volta troca para a screenshot se a cena quebrar. O projeto ativo mora no `usePortfolio` (`activeIndex`, loop módulo n); a cena recebe `activeIndex`, `onSelect` e cores em hex, e gira pelo caminho mais curto.
 
 ## 3. Dados
 
@@ -55,7 +57,7 @@ Sem dados de usuário. Os pontos de atenção (headers, dependências, contas) e
 
 ## 6. Em aberto (técnico)
 
-1. O hero do portfólio ainda depende do GSAP para aparecer (`visibility: hidden` até o JS rodar), o que atrasa o LCP. O da home já entra em CSS. Spec 0001 (e plano 05).
+1. Os aparelhos 3D ficam quase pretos (grafite metálico sem mapa de ambiente) e os laterais pouco aparecem atrás do notebook. Spec 0007 (Lightformer, materiais).
 2. Header no celular conferido em 390px (iframe) no plano 04; falta teste num aparelho real. Spec 0002.
 3. `yarn start` aponta para `build/server/index.js`, que o plugin da Netlify não gera. Spec 0003.
 4. Página da empresa carrega ~160 KB gzip de JS (React, styled-components, GSAP, router). Aceito por ora; reavaliar se as métricas do Search Console apontarem problema.
