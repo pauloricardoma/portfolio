@@ -1,189 +1,128 @@
 /**
- * DevicePhone.tsx — Modelo 3D de um smartphone.
+ * DevicePhone.tsx — Celular modelado em código.
  *
- * CONCEITOS THREE.JS USADOS:
+ * Corpo: retângulo arredondado extrudado com chanfro (geometry.ts). A
+ * ExtrudeGeometry tem dois grupos de material: 0 = frente/trás (vidro
+ * fosco traseiro) e 1 = laterais (aro de metal polido), por isso dois
+ * materiais com attach="material-0|1".
  *
- * 1. Mesh = Geometry + Material
- *    - Geometry: a forma 3D (cubo, esfera, cilindro, etc.)
- *    - Material: a aparência (cor, brilho, reflexo, textura)
- *    Um mesh é um objeto visível na cena.
- *
- * 2. RoundedBox (do @react-three/drei)
- *    - Um BoxGeometry com bordas arredondadas.
- *    - Three.js puro só tem BoxGeometry com cantos retos.
- *    - drei resolve isso com uma geometria customizada.
- *    - args: [largura, altura, profundidade]
- *    - radius: raio do arredondamento das bordas
- *
- * 3. Materiais:
- *    - meshStandardMaterial: material PBR (Physically Based Rendering)
- *      que reage à luz de forma realista. Tem propriedades:
- *      - color: cor base
- *      - metalness: 0=plástico, 1=metal (reflete o ambiente)
- *      - roughness: 0=espelho, 1=fosco
- *    - meshBasicMaterial: material que NÃO reage à luz (sempre flat).
- *      Usado na tela porque queremos que o screenshot apareça
- *      sem ser escurecido pelas sombras.
- *
- * 4. useTexture (do drei):
- *    Carrega uma imagem e converte pra THREE.Texture automaticamente.
- *    A textura é aplicada na prop "map" do material.
- *    "map" = mapeamento de textura (imagem → superfície 3D).
- *
- * 5. Group (<group>):
- *    Container que agrupa múltiplos meshes.
- *    Mover/rotacionar o group move todos os filhos juntos.
- *    Equivale a um <div> no HTML — organização hierárquica.
- *
- * 6. position: [x, y, z]
- *    - x: horizontal (esquerda/direita)
- *    - y: vertical (cima/baixo)
- *    - z: profundidade (frente/trás, em direção à câmera)
- *    Cada unidade no Three.js não tem medida real — é relativa.
+ * Frente: vidro preto, tela inset com cantos arredondados e a ilha.
+ * Trás: módulo de câmera elevado com três lentes e flash.
+ * Laterais: botões de volume, ação e power.
  */
-import { useRef } from "react";
-import { RoundedBox, Ring } from "@react-three/drei";
-import { useTexture } from "@react-three/drei";
-import type { Group } from "three";
+import { useMemo } from "react";
+import { RoundedBox } from "@react-three/drei";
+import { BEZEL, type DevicePalette } from "./config";
+import { chamferedSlab, roundedPlane } from "./geometry";
+import DeviceScreen from "./DeviceScreen";
 
 interface DevicePhoneProps {
-  /** Caminho pro screenshot do app (em /public/) */
   screenTexture: string;
-  /** Cor da carcaça do celular (hex string, ex: "#1a1a2e") */
-  color?: string;
-  /** Posição no espaço 3D [x, y, z] */
-  position?: [number, number, number];
-  /** Rotação em radianos [x, y, z] */
-  rotation?: [number, number, number];
-  /** Escala uniforme */
+  palette: DevicePalette;
   scale?: number;
 }
 
-/** Proporções do celular (baseado em iPhone ~6.1") */
-const PHONE_WIDTH = 1.0;
-const PHONE_HEIGHT = 2.1;
-const PHONE_DEPTH = 0.08;
-const SCREEN_INSET = 0.06;
+const WIDTH = 1.0;
+const HEIGHT = 2.1;
+const DEPTH = 0.1;
+const CORNER = 0.15;
+const FRONT_Z = DEPTH / 2;
+const BACK_Z = -DEPTH / 2;
 
-export default function DevicePhone({
-  screenTexture,
-  color = "#1a1a2e",
-  position = [0, 0, 0],
-  rotation = [0, 0, 0],
-  scale = 1.3,
-}: DevicePhoneProps) {
-  const groupRef = useRef<Group>(null);
+/** Lentes da câmera traseira, relativas ao módulo */
+const LENSES: [number, number][] = [
+  [-0.085, 0.085],
+  [-0.085, -0.085],
+  [0.085, 0],
+];
 
-  /**
-   * useTexture — Carrega a imagem do screenshot como uma textura 3D.
-   * Internamente, faz: new THREE.TextureLoader().load(url)
-   * E já cuida do loading/caching automaticamente.
-   */
-  const texture = useTexture(screenTexture);
+export default function DevicePhone({ screenTexture, palette, scale = 1.1 }: DevicePhoneProps) {
+  const body = useMemo(() => chamferedSlab(WIDTH, HEIGHT, DEPTH, CORNER, 0.018), []);
+  const glass = useMemo(() => roundedPlane(WIDTH - 0.03, HEIGHT - 0.03, CORNER - 0.015), []);
+  const island = useMemo(() => roundedPlane(0.27, 0.078, 0.039), []);
+  const cameraPlate = useMemo(() => chamferedSlab(0.42, 0.42, 0.03, 0.1, 0.008), []);
 
   return (
-    <group ref={groupRef} position={position} rotation={rotation} scale={scale}>
-      {/**
-       * CORPO DO CELULAR (carcaça)
-       *
-       * RoundedBox: caixa com bordas arredondadas.
-       * args={[largura, altura, profundidade]}
-       * radius={0.06}: raio do arredondamento — simula cantos do iPhone.
-       * smoothness={4}: quantidade de segmentos nas curvas (mais = mais suave).
-       *
-       * Material: meshStandardMaterial com metalness alto (0.8)
-       * pra dar aquele brilho metálico de alumínio.
-       * roughness 0.2 = quase espelhado, reflete a luz.
-       * color "#1a1a2e": azul escuro quase preto (como um iPhone Pro).
-       */}
-      <RoundedBox args={[PHONE_WIDTH, PHONE_HEIGHT, PHONE_DEPTH]} radius={0.06} smoothness={4}>
-        <meshStandardMaterial color={color} metalness={0.4} roughness={0.2} />
-      </RoundedBox>
-
-      {/**
-       * TELA DO CELULAR
-       *
-       * Um plano (planeGeometry) posicionado levemente à frente do corpo (z=0.041).
-       * Precisa estar FORA do corpo pra não ficar "dentro" dele.
-       *
-       * planeGeometry args={[largura, altura]}: retângulo 2D.
-       * Menor que o corpo (SCREEN_INSET) pra simular a moldura/bezel.
-       *
-       * meshBasicMaterial com map={texture}:
-       * - "map" é a prop que aplica uma textura (imagem) no material.
-       * - meshBasicMaterial pra tela: NÃO reage à luz.
-       *   Isso é proposital — telas de celular emitem luz própria,
-       *   então não faz sentido elas ficarem mais escuras por sombra.
-       * - toneMapped={false}: desativa o tone mapping do renderer.
-       *   Sem isso, as cores da textura ficam "lavadas" (dessaturadas).
-       */}
-      <mesh position={[0, 0, PHONE_DEPTH / 2 + 0.001]}>
-        <planeGeometry args={[PHONE_WIDTH - SCREEN_INSET, PHONE_HEIGHT - SCREEN_INSET]} />
-        <meshBasicMaterial map={texture} toneMapped={false} />
+    <group scale={scale}>
+      {/* Corpo: traseira de vidro fosco + aro polido */}
+      <mesh geometry={body}>
+        <meshPhysicalMaterial
+          attach="material-0"
+          color={palette.body}
+          metalness={0.2}
+          roughness={0.5}
+          clearcoat={0.6}
+          clearcoatRoughness={0.35}
+        />
+        <meshPhysicalMaterial attach="material-1" color={palette.frame} metalness={1} roughness={0.22} />
       </mesh>
 
-      {/**
-       * MÓDULO DE CÂMERA TRASEIRA (estilo iPhone Pro)
-       *
-       * Composto por:
-       * 1. Bloco retangular arredondado (o "island" da câmera)
-       * 2. 3 lentes circulares dispostas em triângulo
-       *
-       * Tudo posicionado em z NEGATIVO (parte de trás do celular).
-       * z = -(PHONE_DEPTH/2 + espessura) pra ficar atrás da carcaça.
-       *
-       * As lentes usam:
-       * - circleGeometry: disco 2D (a lente escura)
-       * - Ring (drei): anel circular (a borda metálica ao redor da lente)
-       *
-       * Ring args={[innerRadius, outerRadius, segments]}:
-       * - innerRadius: raio do buraco interno
-       * - outerRadius: raio externo do anel
-       * - segments: quantidade de segmentos (32 = círculo suave)
-       */}
-      <group position={[-0.18, PHONE_HEIGHT / 2 - 0.32, -(PHONE_DEPTH / 2)]}>
-        {/* Island da câmera — bloco arredondado que contém as lentes */}
-        <RoundedBox args={[0.38, 0.38, 0.02]} radius={0.06} smoothness={4}>
-          <meshStandardMaterial color={color} metalness={0.5} roughness={0.15} />
+      {/* Frente: vidro preto, tela e ilha */}
+      <mesh geometry={glass} position={[0, 0, FRONT_Z + 0.001]}>
+        <meshPhysicalMaterial color={BEZEL} roughness={0.08} clearcoat={1} clearcoatRoughness={0.05} />
+      </mesh>
+      <DeviceScreen
+        texture={screenTexture}
+        width={WIDTH - 0.1}
+        height={HEIGHT - 0.1}
+        radius={CORNER - 0.04}
+        position={[0, 0, FRONT_Z + 0.002]}
+      />
+      <mesh geometry={island} position={[0, HEIGHT / 2 - 0.12, FRONT_Z + 0.003]}>
+        <meshBasicMaterial color="#000000" />
+      </mesh>
+
+      {/* Botões: ação e volume à esquerda, power à direita */}
+      {[
+        { x: -WIDTH / 2 - 0.006, y: 0.62, h: 0.1 },
+        { x: -WIDTH / 2 - 0.006, y: 0.42, h: 0.18 },
+        { x: -WIDTH / 2 - 0.006, y: 0.18, h: 0.18 },
+        { x: WIDTH / 2 + 0.006, y: 0.36, h: 0.28 },
+      ].map((button) => (
+        <RoundedBox
+          key={`${button.x}-${button.y}`}
+          args={[0.018, button.h, 0.045]}
+          radius={0.008}
+          smoothness={2}
+          position={[button.x, button.y, 0]}
+        >
+          <meshPhysicalMaterial color={palette.frame} metalness={1} roughness={0.25} />
         </RoundedBox>
+      ))}
 
-        {/* Lente superior esquerda */}
-        <group position={[-0.08, 0.08, -0.011]}>
-          <mesh>
-            <circleGeometry args={[0.055, 32]} />
-            <meshStandardMaterial color="#0a0a0f" metalness={0.9} roughness={0.1} />
-          </mesh>
-          <Ring args={[0.055, 0.07, 32]} position={[0, 0, 0.001]}>
-            <meshStandardMaterial color="#888899" metalness={0.8} roughness={0.2} />
-          </Ring>
-        </group>
+      {/* Módulo de câmera traseiro */}
+      <group position={[-0.2, HEIGHT / 2 - 0.32, BACK_Z - 0.01]}>
+        <mesh geometry={cameraPlate}>
+          <meshPhysicalMaterial
+            attach="material-0"
+            color={palette.body}
+            metalness={0.3}
+            roughness={0.3}
+            clearcoat={1}
+            clearcoatRoughness={0.1}
+          />
+          <meshPhysicalMaterial attach="material-1" color={palette.frame} metalness={1} roughness={0.22} />
+        </mesh>
 
-        {/* Lente superior direita */}
-        <group position={[0.08, 0.08, -0.011]}>
-          <mesh>
-            <circleGeometry args={[0.055, 32]} />
-            <meshStandardMaterial color="#0a0a0f" metalness={0.9} roughness={0.1} />
-          </mesh>
-          <Ring args={[0.055, 0.07, 32]} position={[0, 0, 0.001]}>
-            <meshStandardMaterial color="#888899" metalness={0.8} roughness={0.2} />
-          </Ring>
-        </group>
+        {LENSES.map(([x, y]) => (
+          <group key={`${x}-${y}`} position={[x, y, -0.02]} rotation={[Math.PI / 2, 0, 0]}>
+            {/* Anel de metal */}
+            <mesh>
+              <cylinderGeometry args={[0.072, 0.072, 0.02, 32]} />
+              <meshPhysicalMaterial color={palette.frame} metalness={1} roughness={0.2} />
+            </mesh>
+            {/* Vidro da lente */}
+            <mesh position={[0, -0.011, 0]}>
+              <cylinderGeometry args={[0.055, 0.055, 0.004, 32]} />
+              <meshPhysicalMaterial color="#05060A" roughness={0.04} clearcoat={1} metalness={0.5} />
+            </mesh>
+          </group>
+        ))}
 
-        {/* Lente inferior central */}
-        <group position={[-0.08, -0.08, -0.011]}>
-          <mesh>
-            <circleGeometry args={[0.055, 32]} />
-            <meshStandardMaterial color="#0a0a0f" metalness={0.9} roughness={0.1} />
-          </mesh>
-          <Ring args={[0.055, 0.07, 32]} position={[0, 0, 0.001]}>
-            <meshStandardMaterial color="#888899" metalness={0.8} roughness={0.2} />
-          </Ring>
-        </group>
-
-        {/* Flash LED — pequeno círculo dourado */}
-        <mesh position={[0.08, -0.08, -0.011]}>
-          <circleGeometry args={[0.025, 32]} />
-          <meshStandardMaterial color="#E8C86A" metalness={0.3} roughness={0.4} />
+        {/* Flash */}
+        <mesh position={[0.085, 0.13, -0.016]} rotation={[0, Math.PI, 0]}>
+          <circleGeometry args={[0.026, 24]} />
+          <meshStandardMaterial color="#F2E6C8" roughness={0.4} />
         </mesh>
       </group>
     </group>

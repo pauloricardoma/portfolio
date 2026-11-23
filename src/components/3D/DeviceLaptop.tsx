@@ -1,151 +1,122 @@
 /**
- * DeviceLaptop.tsx — Modelo 3D de um MacBook/laptop.
+ * DeviceLaptop.tsx — Notebook modelado em código.
  *
- * CONCEITOS NOVOS:
+ * Base: bloco de alumínio com chanfro deitado no plano xz (topo em y = 0),
+ * poço do teclado, teclas instanciadas e trackpad.
  *
- * 1. Composição de meshes:
- *    O laptop é montado com DUAS peças: base (teclado) + tela.
- *    Cada peça é um RoundedBox separado, posicionado manualmente.
- *    A tela é rotacionada em X pra simular o ângulo de abertura.
- *
- * 2. rotation: [x, y, z] — rotação em RADIANOS (não graus).
- *    - Math.PI = 180° (meia volta)
- *    - Math.PI / 2 = 90° (um quarto de volta)
- *    - Math.PI * -0.05 = inclinação sutil (~9°)
- *    Pra converter: radianos = graus × (Math.PI / 180)
- *
- * 3. Hierarquia de grupo:
- *    <group> (laptop inteiro)
- *      └── <group> (tela — rotacionada como dobradiça)
- *            ├── RoundedBox (moldura da tela)
- *            └── mesh (tela com screenshot)
- *    Rotacionar o grupo da tela faz ela "abrir" como uma dobradiça real.
- *    O pivot (ponto de rotação) fica na base da tela (onde a dobradiça seria).
- *
- * 4. useFrame (do R3F):
- *    Hook que roda a CADA FRAME de renderização (~60x por segundo).
- *    Usado aqui pra criar animação de "respiração" (float sutil).
- *    delta = tempo desde o último frame (pra animação independente de FPS).
- *    NÃO use useFrame pra lógica pesada — roda 60x/s!
+ * Tampa: presa num grupo de DOBRADIÇA na borda de trás. Girar esse grupo
+ * em x abre e fecha a tampa (LID_CLOSED → LID_OPEN); o `hingeRef` deixa
+ * quem está de fora animar sem re-render (entrada do plano 07).
  */
-import { useRef } from "react";
-import { RoundedBox, useTexture } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { useMemo, type Ref } from "react";
 import type { Group } from "three";
-import LaptopKeyboard from "./LaptopKeyboard";
+import { BEZEL, LED_COLOR, LED_INTENSITY, LID_OPEN, type DevicePalette } from "./config";
+import { chamferedSlab, roundedPlane } from "./geometry";
+import DeviceScreen from "./DeviceScreen";
+import LaptopKeyboard, { keyboardDepth } from "./LaptopKeyboard";
 
 interface DeviceLaptopProps {
   screenTexture: string;
-  color?: string;
-  position?: [number, number, number];
-  rotation?: [number, number, number];
+  palette: DevicePalette;
   scale?: number;
+  /** Ângulo inicial da dobradiça (radianos) */
+  lidAngle?: number;
+  hingeRef?: Ref<Group>;
 }
 
-/** Proporções do MacBook (~14") */
-const BASE_WIDTH = 2.3;
-const BASE_DEPTH = 1.6;
-const BASE_HEIGHT = 0.06;
-const SCREEN_WIDTH = 2.3;
-const SCREEN_HEIGHT = 1.5;
-const SCREEN_DEPTH = 0.04;
-const SCREEN_INSET = 0.08;
+const WIDTH = 2.3;
+const BASE_DEPTH = 1.55;
+const BASE_THICKNESS = 0.07;
+const LID_HEIGHT = 1.5;
+const LID_THICKNESS = 0.04;
+const CORNER = 0.08;
+
+const KEYBOARD_WIDTH = WIDTH - 0.42;
+const KEYBOARD_DEPTH = keyboardDepth(KEYBOARD_WIDTH);
+/** Centro do teclado em z: perto da dobradiça, como num notebook real */
+const KEYBOARD_Z = -BASE_DEPTH / 2 + 0.14 + KEYBOARD_DEPTH / 2;
+const TRACKPAD = { width: 0.95, depth: 0.52 };
+const TRACKPAD_Z = BASE_DEPTH / 2 - 0.1 - TRACKPAD.depth / 2;
+
+/** Superfícies deitadas no plano xz (planos nascem no xy) */
+const FLAT: [number, number, number] = [-Math.PI / 2, 0, 0];
 
 export default function DeviceLaptop({
   screenTexture,
-  color = "#1a1a2e",
-  position = [0, -0.15, 0],
-  rotation = [0, 0, 0],
-  scale = 1.3,
+  palette,
+  scale = 1,
+  lidAngle = LID_OPEN,
+  hingeRef,
 }: DeviceLaptopProps) {
-  const groupRef = useRef<Group>(null);
-  const texture = useTexture(screenTexture);
-
-  /**
-   * useFrame — Animação de "respiração" (float).
-   *
-   * O laptop sobe e desce suavemente usando Math.sin() (onda senoidal).
-   * state.clock.elapsedTime: tempo total desde o início (em segundos).
-   *
-   * Math.sin(tempo * velocidade) * amplitude:
-   * - velocidade 1.5 = ciclo a cada ~4 segundos
-   * - amplitude 0.03 = move apenas 0.03 unidades (sutil, quase imperceptível)
-   *
-   * Isso dá vida ao objeto sem distrair o usuário.
-   */
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.position.y =
-        (position?.[1] || 0) + Math.sin(state.clock.elapsedTime * 1.5) * 0.03;
-    }
-  });
+  const base = useMemo(() => chamferedSlab(WIDTH, BASE_DEPTH, BASE_THICKNESS, CORNER, 0.012), []);
+  const lid = useMemo(() => chamferedSlab(WIDTH, LID_HEIGHT, LID_THICKNESS, CORNER, 0.01), []);
+  const deck = useMemo(() => roundedPlane(KEYBOARD_WIDTH + 0.06, KEYBOARD_DEPTH + 0.06, 0.03), []);
+  const trackpad = useMemo(() => roundedPlane(TRACKPAD.width, TRACKPAD.depth, 0.05), []);
+  const bezel = useMemo(() => roundedPlane(WIDTH - 0.025, LID_HEIGHT - 0.025, CORNER - 0.01), []);
 
   return (
-    <group ref={groupRef} position={position} rotation={rotation} scale={scale}>
-      {/**
-       * BASE DO LAPTOP (teclado + trackpad)
-       *
-       * Rotação X de -Math.PI/2 (90°) pra deitar o box horizontalmente.
-       * Sem isso, o RoundedBox ficaria em pé (como uma parede).
-       */}
-      <RoundedBox
-        args={[BASE_WIDTH, BASE_DEPTH, BASE_HEIGHT]}
-        radius={0.03}
-        smoothness={4}
-        rotation={[-Math.PI / 3, 0, 0]}
-        position={[0, -0.25, -0.06]}
-      >
-        <meshStandardMaterial color={color} metalness={0.4} roughness={0.2} />
-      </RoundedBox>
+    /* Desce o conjunto para o centro visual ficar perto da origem do carrossel */
+    <group scale={scale} position={[0, -1.0, -0.45]}>
+      {/* Base */}
+      <mesh geometry={base} rotation={FLAT} position={[0, -BASE_THICKNESS / 2, 0]}>
+        <meshPhysicalMaterial attach="material-0" color={palette.body} metalness={0.6} roughness={0.42} />
+        <meshPhysicalMaterial attach="material-1" color={palette.frame} metalness={1} roughness={0.25} />
+      </mesh>
 
-      {/**
-       * TECLADO 3D — posicionado sobre a base do laptop.
-       *
-       * A base está rotacionada em -Math.PI/3 (~60°), então o teclado
-       * precisa da mesma rotação pra ficar "colado" na superfície.
-       *
-       * position: mesma posição da base, com ajuste em z pra ficar
-       * na face superior (BASE_HEIGHT/2 acima da superfície).
-       *
-       * O y interno do group compensa o offset do layout QWERTY
-       * (as teclas são calculadas de cima pra baixo, começando em y=0).
-       */}
-      <group rotation={[-Math.PI / 3, 0, 0]} position={[0, -0.25, -0.06]}>
-        <group position={[0, 0.46, BASE_HEIGHT / 2 + 0.001]}>
-          <LaptopKeyboard color={color} />
-        </group>
+      {/* Poço do teclado + teclas */}
+      <mesh geometry={deck} rotation={FLAT} position={[0, 0.001, KEYBOARD_Z]}>
+        <meshStandardMaterial color={palette.deck} metalness={0.6} roughness={0.5} />
+      </mesh>
+      <group position={[0, 0.001, KEYBOARD_Z]}>
+        <LaptopKeyboard color={palette.keys} width={KEYBOARD_WIDTH} />
       </group>
 
-      {/**
-       * GRUPO DA TELA — posicionado na "dobradiça" (borda traseira da base).
-       *
-       * position: [0, 0, -BASE_DEPTH/2] = borda de trás da base.
-       * rotation: [0.2, 0, 0] = inclinação de ~11° pra trás
-       * (como um laptop aberto normalmente, não 90° reto).
-       *
-       * Dentro deste grupo:
-       * - A tela é posicionada com y=SCREEN_HEIGHT/2 pra que o
-       *   ponto de rotação fique na BASE da tela (dobradiça),
-       *   não no centro dela.
-       */}
-      <group position={[0, 0, -BASE_DEPTH / 2]} rotation={[0.2, 0, 0]}>
-        {/* Moldura da tela */}
-        <RoundedBox
-          args={[SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_DEPTH]}
-          radius={0.05}
-          smoothness={4}
-          position={[0, SCREEN_HEIGHT / 1.68, 0]}
-        >
-          <meshStandardMaterial color={color} metalness={0.4} roughness={0.2} />
-        </RoundedBox>
+      {/* Trackpad de vidro */}
+      <mesh geometry={trackpad} rotation={FLAT} position={[0, 0.002, TRACKPAD_Z]}>
+        <meshPhysicalMaterial color={palette.deck} metalness={0.3} roughness={0.22} clearcoat={0.8} />
+      </mesh>
 
-        {/* Tela com screenshot */}
-        <mesh position={[0, SCREEN_HEIGHT / 1.68, SCREEN_DEPTH / 2 + 0.001]}>
-          <planeGeometry
-            args={[SCREEN_WIDTH - SCREEN_INSET, SCREEN_HEIGHT - SCREEN_INSET]}
-          />
-          <meshBasicMaterial map={texture} toneMapped={false} />
+      {/* Dobradiça: o eixo fica na borda de trás da base */}
+      <group ref={hingeRef} position={[0, 0.005, -BASE_DEPTH / 2 + 0.03]} rotation={[lidAngle, 0, 0]}>
+        <mesh rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.03, 0.03, WIDTH - 0.6, 24]} />
+          <meshPhysicalMaterial color={palette.frame} metalness={1} roughness={0.3} />
         </mesh>
+
+        {/* Tampa: costas de alumínio, frente de vidro preto com a tela */}
+        <group position={[0, LID_HEIGHT / 2 + 0.02, 0]}>
+          <mesh geometry={lid}>
+            <meshPhysicalMaterial attach="material-0" color={palette.body} metalness={0.6} roughness={0.42} />
+            <meshPhysicalMaterial attach="material-1" color={palette.frame} metalness={1} roughness={0.25} />
+          </mesh>
+          <mesh geometry={bezel} position={[0, 0, LID_THICKNESS / 2 + 0.001]}>
+            <meshPhysicalMaterial color={BEZEL} roughness={0.1} clearcoat={1} clearcoatRoughness={0.05} />
+          </mesh>
+          <DeviceScreen
+            texture={screenTexture}
+            width={WIDTH - 0.17}
+            height={LID_HEIGHT - 0.2}
+            radius={0.02}
+            position={[0, -0.03, LID_THICKNESS / 2 + 0.002]}
+          />
+
+          {/* Câmera e LED na moldura de cima */}
+          <group position={[0, LID_HEIGHT / 2 - 0.05, LID_THICKNESS / 2 + 0.003]}>
+            <mesh>
+              <circleGeometry args={[0.014, 20]} />
+              <meshPhysicalMaterial color="#05060A" roughness={0.05} clearcoat={1} />
+            </mesh>
+            <mesh position={[0.045, 0, 0]}>
+              <circleGeometry args={[0.006, 16]} />
+              <meshStandardMaterial
+                color={LED_COLOR}
+                emissive={LED_COLOR}
+                emissiveIntensity={LED_INTENSITY}
+                toneMapped={false}
+              />
+            </mesh>
+          </group>
+        </group>
       </group>
     </group>
   );

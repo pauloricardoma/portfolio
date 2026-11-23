@@ -1,177 +1,87 @@
 /**
- * LaptopKeyboard.tsx — Teclado 3D para o modelo de laptop.
+ * LaptopKeyboard.tsx — Teclado do notebook com InstancedMesh.
  *
- * CONCEITOS THREE.JS USADOS:
+ * Todas as teclas são UMA geometria desenhada N vezes (uma draw call).
+ * Cada instância tem posição e escala próprias: a largura vem do layout
+ * (em "unidades" de tecla, como num teclado real: Tab 1.5u, Caps 1.75u,
+ * Shift 2.25u, espaço 5u) e a fileira de funções tem meia altura.
  *
- * 1. InstancedMesh:
- *    Renderiza N cópias da mesma geometria+material numa ÚNICA draw call.
- *    Sem instancing: 26 teclas = 26 draw calls (GPU processa cada uma separada).
- *    Com instancing: 26 teclas = 1 draw call (GPU desenha todas de uma vez).
- *
- *    Como funciona:
- *    - Cria um <instancedMesh> com args={[geometry, material, count]}
- *    - Cada instância recebe uma MATRIZ 4x4 (posição + rotação + escala)
- *    - setMatrixAt(index, matrix) define onde cada cópia aparece
- *    - instanceMatrix.needsUpdate = true avisa a GPU pra atualizar
- *
- * 2. Object3D como "dummy" (fantoche):
- *    Pra calcular a matriz de cada tecla, usamos um Object3D temporário.
- *    Setamos position/rotation/scale nele, chamamos updateMatrix(),
- *    e copiamos a matrix resultante pro instancedMesh.
- *    É um padrão comum no Three.js pra posicionar instâncias.
- *
- * 3. RoundedBoxGeometry (three-stdlib):
- *    Geometria de caixa com bordas arredondadas — usada pra cada tecla
- *    ter aquele visual suave de tecla real de MacBook.
- *
- * 4. Layout QWERTY:
- *    As teclas são posicionadas em 4 linhas (como um teclado real):
- *    - Linha 1-5: Q W E R T Y U I O P  (12 teclas)
- *    - Linha 6:     [touchpad]         (espaço separado, geometria diferente)
- *
- *    O offset horizontal de cada linha simula o escalonamento real
- *    de um teclado QWERTY (cada linha começa um pouco mais à direita).
+ * O teclado fica deitado no plano xz, com a face de cima em y = 0.
  */
-import { useRef, useEffect, useMemo } from "react";
-import { Object3D } from "three";
-import type { InstancedMesh } from "three";
-import { RoundedBox } from "@react-three/drei";
+import { useLayoutEffect, useMemo, useRef } from "react";
+import { Object3D, type InstancedMesh } from "three";
 import { RoundedBoxGeometry } from "three-stdlib";
 
 interface LaptopKeyboardProps {
-  /** Cor das teclas (hex) */
-  color?: string;
+  color: string;
+  /** Largura total disponível para o teclado */
+  width: number;
 }
 
-/**
- * Layout QWERTY — quantidade de teclas por linha.
- * Não precisamos das letras (não renderizamos texto 3D),
- * só da quantidade pra calcular posições no grid.
- */
-const ROWS = [12, 12, 12, 12, 12];
+/** Larguras em unidades; cada fileira soma 14.5u */
+const LAYOUT: number[][] = [
+  [...Array(13).fill(1), 1.5],
+  [...Array(13).fill(1), 1.5],
+  [1.5, ...Array(12).fill(1), 1],
+  [1.75, ...Array(11).fill(1), 1.75],
+  [2.25, ...Array(10).fill(1), 2.25],
+  [1, 1, 1, 1.25, 5, 1.25, 1, 1, 1, 1],
+];
+const ROW_UNITS = 14.5;
+/** A fileira de funções (a primeira) tem meia altura */
+const ROW_HEIGHT_FACTOR = [0.5, 1, 1, 1, 1, 1];
+const KEY_TRAVEL = 0.014;
 
-/**
- * Dimensões das teclas — proporcionais à base do laptop (2.3 x 1.6).
- * Teclas de laptop são mais largas e rasas que teclas de celular.
- */
-const KEY_WIDTH = 0.14;
-const KEY_HEIGHT = 0.14;
-const KEY_DEPTH = 0.02;
-const KEY_GAP = 0.02;
-const ROW_GAP = 0.03;
-const KEY_RADIUS = 0.02;
-const TOUCH_PAD_HEIGHT = 0.44;
-
-export default function LaptopKeyboard({ color = "#2a2a3e" }: LaptopKeyboardProps) {
+export default function LaptopKeyboard({ color, width }: LaptopKeyboardProps) {
   const meshRef = useRef<InstancedMesh>(null);
 
-  /**
-   * Calcula a posição [x, y] de cada tecla nas 3 linhas.
-   *
-   * Para cada linha:
-   * - Calcula a largura total da linha (teclas + gaps)
-   * - startX = -larguraTotal/2 + metade de uma tecla (centraliza)
-   * - Cada tecla: x = startX + index * (KEY_WIDTH + KEY_GAP)
-   * - y diminui a cada linha (vai descendo)
-   *
-   * O offset horizontal é automático: linhas com menos teclas
-   * ficam naturalmente centralizadas porque startX muda.
-   */
-  const keyPositions = useMemo(() => {
-    const positions: [number, number][] = [];
+  const unit = width / ROW_UNITS;
+  const gap = unit * 0.14;
 
-    ROWS.forEach((keyCount, rowIndex) => {
-      const rowWidth = keyCount * KEY_WIDTH + (keyCount - 1) * KEY_GAP;
-      const startX = -rowWidth / 2 + KEY_WIDTH / 2;
+  const keys = useMemo(() => {
+    const list: { x: number; z: number; w: number; d: number }[] = [];
+    let z = 0;
 
-      for (let i = 0; i < keyCount; i++) {
-        const x = startX + i * (KEY_WIDTH + KEY_GAP);
-        const y = -rowIndex * (KEY_HEIGHT + ROW_GAP);
-        positions.push([x, y]);
-      }
+    LAYOUT.forEach((row, rowIndex) => {
+      const depth = unit * ROW_HEIGHT_FACTOR[rowIndex];
+      let x = -width / 2;
+      row.forEach((units) => {
+        const w = units * unit;
+        list.push({ x: x + w / 2, z: z + depth / 2, w: w - gap, d: depth - gap });
+        x += w;
+      });
+      z += depth;
     });
 
-    return positions;
-  }, []);
+    // Centraliza o bloco em z
+    return list.map((key) => ({ ...key, z: key.z - z / 2 }));
+  }, [unit, gap, width]);
 
-  /** Total de teclas normais (Q-P + A-L + Z-M = 26) */
-  const totalKeys = keyPositions.length;
+  const geometry = useMemo(() => new RoundedBoxGeometry(1, 1, 1, 2, 0.12), []);
 
-  /**
-   * Geometria compartilhada — criada UMA vez e reusada por todas as instâncias.
-   * useMemo evita recriar a geometria a cada render.
-   *
-   * RoundedBoxGeometry(largura, altura, profundidade, segmentos, raio)
-   * - segmentos=2: subdivisões nas curvas (2 basta pra teclas pequenas)
-   * - raio: arredondamento das bordas
-   */
-  const geometry = useMemo(
-    () => new RoundedBoxGeometry(KEY_WIDTH, KEY_HEIGHT, KEY_DEPTH, 2, KEY_RADIUS),
-    []
-  );
-
-  /**
-   * useEffect — Posiciona cada instância usando o padrão "dummy Object3D".
-   *
-   * Fluxo:
-   * 1. Cria um Object3D temporário (dummy)
-   * 2. Pra cada tecla: seta position no dummy → updateMatrix() → copia pro instancedMesh
-   * 3. instanceMatrix.needsUpdate = true → avisa a GPU que as posições mudaram
-   *
-   * Por que useEffect e não useFrame?
-   * Porque as posições são ESTÁTICAS — calculamos uma vez e pronto.
-   * useFrame seria desperdício (recalcular 60x/s algo que não muda).
-   */
-  useEffect(() => {
-    if (!meshRef.current) return;
+  useLayoutEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
 
     const dummy = new Object3D();
-
-    keyPositions.forEach(([x, y], i) => {
-      dummy.position.set(x, y, 0);
+    keys.forEach((key, i) => {
+      dummy.position.set(key.x, KEY_TRAVEL / 2, key.z);
+      dummy.scale.set(key.w, KEY_TRAVEL, key.d);
       dummy.updateMatrix();
-      meshRef.current!.setMatrixAt(i, dummy.matrix);
+      mesh.setMatrixAt(i, dummy.matrix);
     });
-
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [keyPositions]);
-
-  /**
-   * Touchpad — posição e largura.
-   * Fica abaixo das 3 linhas de letras.
-   * Largura = 5 teclas + 4 gaps (proporção real de um teclado).
-   */
-  const touchPadY = -ROWS.length * (KEY_HEIGHT + ROW_GAP * 2.2); // um pouco abaixo da última linha
-  const touchPadWidth = KEY_WIDTH * 5 + KEY_GAP * 4;
+    mesh.instanceMatrix.needsUpdate = true;
+  }, [keys]);
 
   return (
-    <group>
-      {/**
-       * TECLAS NORMAIS — InstancedMesh
-       *
-       * <instancedMesh> recebe:
-       * - ref: pra acessar e setar as matrizes via setMatrixAt
-       * - args={[geometry, material, count]}: geometria compartilhada + quantidade
-       * - geometry como prop, material como child (pra controle visual)
-       */}
-      <instancedMesh ref={meshRef} args={[geometry, undefined, totalKeys]}>
-        <meshStandardMaterial color={color} roughness={0.6} metalness={0.1} />
-      </instancedMesh>
-
-      {/**
-       * TOUCHPAD — Mesh separado
-       *
-       * Geometria diferente (mais larga que as teclas normais),
-       * então não pode ser instância do mesmo InstancedMesh.
-       */}
-      <RoundedBox
-        args={[touchPadWidth, TOUCH_PAD_HEIGHT, KEY_DEPTH]}
-        radius={KEY_RADIUS}
-        smoothness={2}
-        position={[0, touchPadY, 0]}
-      >
-        <meshStandardMaterial color={color} roughness={0.6} metalness={0.1} />
-      </RoundedBox>
-    </group>
+    <instancedMesh ref={meshRef} args={[geometry, undefined, keys.length]}>
+      <meshStandardMaterial color={color} roughness={0.65} metalness={0.05} />
+    </instancedMesh>
   );
+}
+
+/** Profundidade total do teclado, para o notebook posicionar o poço */
+export function keyboardDepth(width: number) {
+  const unit = width / ROW_UNITS;
+  return ROW_HEIGHT_FACTOR.reduce((sum, factor) => sum + unit * factor, 0);
 }

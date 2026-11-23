@@ -26,10 +26,12 @@
 import { useRef, useCallback, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import type { Group } from "three";
+import type { Group, Mesh } from "three";
 import type { IProject } from "~/interfaces/portfolio/IProject";
 import DevicePhone from "~/components/3D/DevicePhone";
 import DeviceLaptop from "~/components/3D/DeviceLaptop";
+import FloorShadow from "~/components/3D/FloorShadow";
+import { FLOOR_Y, SHADOW_SIZE, type DevicePalette } from "~/components/3D/config";
 
 const TWO_PI = Math.PI * 2;
 
@@ -44,16 +46,21 @@ interface ProjectsCarouselProps {
   activeIndex: number;
   /** Pede a troca de projeto (o estado fica fora da cena) */
   onSelect: (index: number) => void;
-  /** Cor da carcaça em hex (Three.js não lê var(--…)) */
-  deviceColor: string;
+  /** Cores dos aparelhos em hex, por tema (Three.js não lê var(--…)) */
+  palette: DevicePalette;
   /** Desliga o arraste (no celular, para não bloquear a rolagem da página) */
   dragEnabled?: boolean;
   /** Raio do círculo orbital: maior = aparelhos mais afastados do centro */
   orbitRadius?: number;
   /** Escala do notebook (menor no celular, para não cobrir os de trás) */
   laptopScale?: number;
+  /** Escala do celular (menor no palco estreito do celular) */
+  phoneScale?: number;
   /** Troca instantânea, sem giro */
   reducedMotion?: boolean;
+  /** Sombra no piso (desliga no nível 2 de degradação) */
+  shadows?: boolean;
+  shadowOpacity?: number;
 }
 
 /** Diferença angular em [-π, π): o giro mais curto de `from` até `to` */
@@ -66,11 +73,14 @@ export default function ProjectsCarousel({
   projects,
   activeIndex,
   onSelect,
-  deviceColor,
+  palette,
   dragEnabled = true,
   orbitRadius = 3.2,
-  laptopScale = 1.3,
+  laptopScale = 1,
+  phoneScale = 1.1,
   reducedMotion = false,
+  shadows = true,
+  shadowOpacity = 0.4,
 }: ProjectsCarouselProps) {
   const radius = orbitRadius;
   const count = projects.length;
@@ -83,6 +93,7 @@ export default function ProjectsCarousel({
   const angleRef = useRef(0);
   const targetAngleRef = useRef(0);
   const deviceRefs = useRef<(Group | null)[]>([]);
+  const shadowRefs = useRef<(Mesh | null)[]>([]);
 
   const isDragging = useRef(false);
   const dragStartX = useRef(0);
@@ -123,16 +134,25 @@ export default function ProjectsCarousel({
       if (!device) continue;
 
       const itemAngle = i * anglePerItem + angleRef.current;
+      const x = Math.sin(itemAngle) * radius;
       const z = Math.cos(itemAngle) * radius;
-
-      device.position.x = Math.sin(itemAngle) * radius;
-      device.position.z = z;
-
       /** z vai de -raio (atrás) a +raio (frente) → escala de 0.6 a 1.1 */
-      device.scale.setScalar(0.6 + ((z + radius) / (radius * 2)) * 0.5);
+      const scale = 0.6 + ((z + radius) / (radius * 2)) * 0.5;
+
+      device.position.x = x;
+      device.position.z = z;
+      device.scale.setScalar(scale);
 
       /** De frente para a câmera quando está na posição frontal */
       device.rotation.y = -itemAngle;
+
+      /** A sombra acompanha no piso (o plano está deitado: girar em z = girar no piso) */
+      const shadow = shadowRefs.current[i];
+      if (shadow) {
+        shadow.position.set(x, FLOOR_Y, z);
+        shadow.scale.setScalar(scale);
+        shadow.rotation.z = -itemAngle;
+      }
     }
   });
 
@@ -202,12 +222,24 @@ export default function ProjectsCarousel({
           }}
         >
           {project.type === "mobile" ? (
-            <DevicePhone screenTexture={project.screenshot} color={deviceColor} />
+            <DevicePhone screenTexture={project.screenshot} palette={palette} scale={phoneScale} />
           ) : (
-            <DeviceLaptop screenTexture={project.screenshot} color={deviceColor} scale={laptopScale} />
+            <DeviceLaptop screenTexture={project.screenshot} palette={palette} scale={laptopScale} />
           )}
         </group>
       ))}
+
+      {shadows &&
+        projects.map((project, index) => (
+          <FloorShadow
+            key={`shadow-${project.id}`}
+            ref={(el) => {
+              shadowRefs.current[index] = el;
+            }}
+            size={[...SHADOW_SIZE[project.type]]}
+            opacity={shadowOpacity}
+          />
+        ))}
     </group>
   );
 }
