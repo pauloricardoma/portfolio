@@ -1,6 +1,6 @@
 # Spec 0003 — Headers de segurança, cache de assets e `yarn start`
 
-- **Status:** concluída (aprovada em 23/11/2026; conferência em produção pendente com o usuário)
+- **Status:** concluída (aprovada em 23/11/2026; conferida em produção em 23/11/2026: headers via curl e A+ no securityheaders.com)
 - **Pedido original:** "pode commitar e seguir pra 0003" (backlog: "`netlify.toml`: headers de segurança (CSP, HSTS, X-Frame-Options), cache de assets e `yarn start` funcionando")
 - **Data:** 23/11/2026
 - **Planos:** 08
